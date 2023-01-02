@@ -1,8 +1,13 @@
 cmake_minimum_required(VERSION 3.16)
 project(Anirenderer LANGUAGES CXX)
 
-#Export compile commands for clangd
+# Setup clang-tidy 
+set(CMAKE_CXX_CLANG_TIDY "clang-tidy")
+
+# Export compile commands for clangd
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+# Flags for debug
 list(APPEND ANIRENDERER_DEBUG_FLAGS
     -O0
     -Wall
