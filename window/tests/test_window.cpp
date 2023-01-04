@@ -1,30 +1,62 @@
 #include <window/window.h>
+
+#include <limits>
 #include <thread>
+#include <iostream>
+#include <SFML/System/Clock.hpp>
 
-int main()
-{
-    using namespace std::chrono_literals;
+int main() {
+    ani::Window window(800, 800);
 
-    ani::Window window(500, 500);
+    size_t frames = 0;
 
-    ani::Image image{.pixels = std::vector<std::vector<ani::RGB>>(256, std::vector<ani::RGB>(256, {0, 0, 0}))};
+    sf::Clock clock;
 
-    for(size_t i = 0; i < 256; ++i) {
-        for(size_t j = 0; j < 256; ++j) {
-            if(((i / 8) & 1) + ((j / 8) & 1) == 1) {
-                image.pixels[i][j] = {255, 255, 255};
+    ani::Image image;
+    size_t prev_wwidth = 0;
+    size_t prev_wheight = 0;
+
+    while (window.IsOpen()) {
+        window.PollEvents();
+
+        ani::RGB color1 = ((frames / 8) & 1) ? ani::RGB{100, 50, 32} : ani::RGB{0, 0, 0};
+        ani::RGB color2 =
+            ani::RGB{static_cast<uint8_t>(255 - color1.r), static_cast<uint8_t>(255 - color1.g),
+                     static_cast<uint8_t>(255 - color1.b)};
+
+
+        if(prev_wwidth != window.GetWidth() || prev_wheight != window.GetHeight()) {
+            prev_wwidth = window.GetWidth();
+            prev_wheight = window.GetHeight();
+
+            image.pixels = std::vector<std::vector<ani::RGB>>(window.GetHeight(), std::vector<ani::RGB>(window.GetWidth(), {0, 0, 0}));
+        }
+
+        for (size_t i = 0; i < window.GetHeight(); ++i) {
+            for (size_t j = 0; j < window.GetWidth(); ++j) {
+                if (((i / 8) & 1) + ((j / 8) & 1) == 1) {
+                    image.pixels[i][j] = color2;
+                } else {
+                    image.pixels[i][j] = color1;
+                }
+            }
+        }
+
+        window.Display(image);
+        ++frames;
+
+        if (frames & 8) {
+            std::cerr << "FPS: "
+                      << static_cast<size_t>(static_cast<float>(frames) /
+                                             clock.getElapsedTime().asSeconds())
+                      << std::endl;
+            
+            if(frames > 100) {
+                frames = 0;
+                clock.restart();
             }
         }
     }
 
-    window.Display(image);
-
-    std::this_thread::sleep_for(4s); 
-
-    window.Display(image);
-
-    std::this_thread::sleep_for(6s); 
-
     return 0;
 }
-

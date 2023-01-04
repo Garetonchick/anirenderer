@@ -22,6 +22,7 @@ public:
     void SetSize(uint32_t width, uint32_t height);
     void Display(const Image& image);
     void Clear(const RGB& color = {0, 255, 0});
+    void PollEvents();
 
 private:
     void CopyImageToScreenBuffer(const Image& image);
