@@ -29,16 +29,14 @@ int main() {
             prev_wwidth = window.GetWidth();
             prev_wheight = window.GetHeight();
 
-            image.pixels = std::vector<std::vector<ani::RGB>>(window.GetHeight(), std::vector<ani::RGB>(window.GetWidth(), {0, 0, 0}));
+            image = ani::Image(window.GetWidth(), window.GetHeight(), color1);
         }
 
         for (size_t i = 0; i < window.GetHeight(); ++i) {
             for (size_t j = 0; j < window.GetWidth(); ++j) {
                 if (((i / 8) & 1) + ((j / 8) & 1) == 1) {
-                    image.pixels[i][j] = color2;
-                } else {
-                    image.pixels[i][j] = color1;
-                }
+                    image.SetPixel(i, j, color2);
+                } 
             }
         }
 

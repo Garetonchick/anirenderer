@@ -37,9 +37,7 @@ void Window::SetSize(uint32_t width, uint32_t height) {
 }
 
 void Window::Display(const Image& image) {
-    CopyImageToScreenBuffer(image);
-
-    texture_.update(screen_buf_.get());
+    texture_.update(image.GetRawRGBA());
     sfml_window_.draw(sprite_);
     sfml_window_.display();
 }
@@ -61,23 +59,6 @@ void Window::PollEvents() {
 }
 
 // Private members
-
-void Window::CopyImageToScreenBuffer(const Image& image) {
-    auto rows_num = std::min<size_t>(image.pixels.size(), GetHeight());
-
-    for (uint32_t i = 0; i < rows_num; ++i) {
-        auto cols_num = std::min<size_t>(image.pixels[i].size(), GetWidth());
-
-        for (uint32_t j = 0; j < cols_num; ++j) {
-            auto offset = (i * GetWidth() + j) * kColorChannelsNum;
-
-            screen_buf_.get()[offset] = image.pixels[i][j].r;
-            screen_buf_.get()[offset + 1] = image.pixels[i][j].g;
-            screen_buf_.get()[offset + 2] = image.pixels[i][j].b;
-            screen_buf_.get()[offset + 3] = 255;
-        }
-    }
-}
 
 void Window::Reset() {
     sfml_window_.setView(

@@ -25,7 +25,6 @@ public:
     void PollEvents();
 
 private:
-    void CopyImageToScreenBuffer(const Image& image);
     void Reset();
 
 private:

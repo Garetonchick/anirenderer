@@ -41,3 +41,4 @@ message(STATUS "Anirenderer debug flags are: ${ANIRENDERER_DEBUG_FLAGS}")
 target_link_libraries(anirenderer PRIVATE sfml-graphics)
 
 add_subdirectory(window)
+add_subdirectory(utility)
