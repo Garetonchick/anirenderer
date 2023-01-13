@@ -1,0 +1,11 @@
+add_library(primitive_renderer STATIC primitive_renderer.cpp)
+target_link_libraries(primitive_renderer PRIVATE utility)
+target_compile_options(primitive_renderer PRIVATE ${ANIRENDERER_DEBUG_FLAGS})
+
+# Tests
+add_executable(test_primitive_renderer_points "tests/test_primitive_renderer_points.cpp")
+target_link_libraries(test_primitive_renderer_points PRIVATE window primitive_renderer sfml-graphics)
+
+add_executable(test_primitive_renderer_segments "tests/test_primitive_renderer_segments.cpp")
+target_link_libraries(test_primitive_renderer_segments PRIVATE window primitive_renderer sfml-graphics)
+

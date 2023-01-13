@@ -32,10 +32,10 @@ int main() {
             image = ani::Image(window.GetWidth(), window.GetHeight(), color1);
         }
 
-        for (size_t i = 0; i < window.GetHeight(); ++i) {
-            for (size_t j = 0; j < window.GetWidth(); ++j) {
-                if (((i / 8) & 1) + ((j / 8) & 1) == 1) {
-                    image.SetPixel(i, j, color2);
+        for (size_t x = 0; x < window.GetWidth(); ++x) {
+            for (size_t y = 0; y < window.GetHeight(); ++y) {
+                if (((x / 8) & 1) + ((y / 8) & 1) == 1) {
+                    image.SetPixel(x, y, color2);
                 } 
             }
         }

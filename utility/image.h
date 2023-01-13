@@ -15,12 +15,12 @@ public:
 
     uint32_t GetWidth() const;
     uint32_t GetHeight() const;
-    RGB GetPixel(uint32_t row, uint32_t col) const;
+    RGB GetPixel(uint32_t x, uint32_t y) const;
     const uint8_t* GetRawRGBA() const;
 
-    void SetPixel(uint32_t row, uint32_t col, const RGB& color);
-    void SetSize(uint32_t width, uint32_t height);
-
+    void SetPixel(uint32_t x, uint32_t y, const RGB& color);
+    void SetSize(uint32_t width, uint32_t height, const RGB& color = {});
+    void Fill(const RGB& color);
     
 private:
     static const uint32_t kChannelsNum = 4;

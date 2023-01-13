@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 project(Anirenderer LANGUAGES CXX)
 
-# Setup clang-tidy 
-set(CMAKE_CXX_CLANG_TIDY "clang-tidy")
-
 # Export compile commands for clangd
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -16,8 +13,9 @@ list(APPEND ANIRENDERER_DEBUG_FLAGS
     -std=c++20
 )
 
-# Add root of includes
+# Add roots of includes
 include_directories(${CMAKE_CURRENT_LIST_DIR})
+include_directories(${CMAKE_CURRENT_LIST_DIR}/dependencies)
 
 # Load SFML targets
 include(FetchContent)
@@ -40,5 +38,13 @@ message(STATUS "Anirenderer debug flags are: ${ANIRENDERER_DEBUG_FLAGS}")
 # Link external dependencies to executable
 target_link_libraries(anirenderer PRIVATE sfml-graphics)
 
+# Setup clang-tidy 
+set_target_properties(
+    anirenderer
+    PROPERTIES
+        CXX_CLANG_TIDY "clang-tidy"
+)
+
 add_subdirectory(window)
 add_subdirectory(utility)
+add_subdirectory(primitive_renderer)
