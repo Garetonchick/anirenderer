@@ -4,6 +4,9 @@
 #include <stdexcept>
 #include <algorithm>
 #include <cmath>
+#include <iostream>
+#include "primitive_renderer/primitives.h"
+#include "utility/utility.h"
 
 namespace ani {
     PrimitiveRenderer::PrimitiveRenderer(uint32_t screen_width, uint32_t screen_height) : 
@@ -58,9 +61,57 @@ namespace ani {
         }
     }
 
+    std::pair<int32_t, int32_t> PrimitiveRenderer::FindMinMaxIntersections(float x1, float y1, float x2, float y2, int32_t y) {
+        float ndc_y = FromPixelCoordinateToNDC(y, screen_.GetHeight());        
+
+        if(y1 > y2) {
+            std::swap(y1, y2);
+            std::swap(x1, x2);
+        }
+
+        if(y1 > ndc_y || y2 < ndc_y) {
+            return {std::numeric_limits<int32_t>::max(), -1};
+        }
+
+        float dy = y2 - y1;
+
+        if(std::abs(dy) < kEpsilon) {
+            return {FromNDCToPixelCoordinate(std::min(x1, x2), screen_.GetWidth()), FromNDCToPixelCoordinate(std::max(x1, x2), screen_.GetWidth())};
+        }
+
+        float k = (x2 - x1) / dy;
+        float b = x1 - k * y1;
+        float ndc_x = k * ndc_y + b;
+        std::cerr << "y is:" << y << std::endl;
+        std::cerr << "Ndc y is:" << ndc_y << std::endl;
+        std::cerr << "Ndc x is:" << ndc_x << std::endl;
+        int32_t x = FromNDCToPixelCoordinate(ndc_x, screen_.GetWidth());
+
+        return {x, x}; 
+    }
+
+    std::pair<int32_t, int32_t> PrimitiveRenderer::GetScanBounds(const Triangle& triangle, int32_t y) {
+        auto [edge1_mn, edge1_mx] = FindMinMaxIntersections(triangle.points[0].pos.x, triangle.points[0].pos.y, triangle.points[1].pos.x, triangle.points[1].pos.y, y);
+        auto [edge2_mn, edge2_mx] = FindMinMaxIntersections(triangle.points[1].pos.x, triangle.points[1].pos.y, triangle.points[2].pos.x, triangle.points[2].pos.y, y);
+        auto [edge3_mn, edge3_mx] = FindMinMaxIntersections(triangle.points[0].pos.x, triangle.points[0].pos.y, triangle.points[2].pos.x, triangle.points[2].pos.y, y);
+        
+        return {std::min({edge1_mn, edge2_mn, edge3_mn}), std::max({edge1_mx, edge2_mx, edge3_mx})};
+        //return {std::min({edge2_mn, edge3_mn}), std::max({edge2_mx, edge3_mx})};
+        //return {edge3_mn, edge3_mx};
+    }
+
     void PrimitiveRenderer::Render(const Triangle& triangle) {
-        (void)triangle;
-        throw std::runtime_error("Not implemented");
+        int32_t mny = FromNDCToPixelCoordinate(std::min({triangle.points[0].pos.y, triangle.points[1].pos.y, triangle.points[2].pos.y}), screen_.GetHeight());
+        int32_t mxy = FromNDCToPixelCoordinate(std::max({triangle.points[0].pos.y, triangle.points[1].pos.y, triangle.points[2].pos.y}), screen_.GetHeight());
+        std::cerr << "Y bounds are: " << mny << ", " << mxy << std::endl;
+
+        for(int32_t y = mny; y <= mxy; ++y) {
+            auto [mnx, mxx] = GetScanBounds(triangle, y); 
+
+            for(int32_t x = mnx; x <= mxx; ++x) {
+                screen_.SetPixel(x, y, ToRGB(triangle.points[0].color));
+            }
+        }
     }
 
     const Image& PrimitiveRenderer::GetRendered() const {
@@ -83,8 +134,12 @@ namespace ani {
                 ((p.pos.y + 1.f) * 0.5f) * static_cast<float>(screen_.GetHeight()) - 0.5f};
     }
 
-    int32_t FromNDCToPixelCoordinate(float ndc, int32_t bound) {
+    int32_t PrimitiveRenderer::FromNDCToPixelCoordinate(float ndc, int32_t bound) {
         return std::clamp<int32_t>((ndc + 1.f) * 0.5f * static_cast<float>(bound) - 0.5f, 0, bound - 1);
+    }
+
+    float PrimitiveRenderer::FromPixelCoordinateToNDC(int32_t cord, int32_t bound) {
+        return (static_cast<float>(cord) + 0.5f) / static_cast<float>(bound) * 2.f - 1.f;
     }
 
     ani::RGB PrimitiveRenderer::ToRGB(const glm::vec4& color) {

@@ -4,6 +4,8 @@
 
 #include <glm/vec4.hpp>
 
+#include <functional>
+
 namespace ani {
 // Expects all coordinates in ndc
 class PrimitiveRenderer {
@@ -22,7 +24,10 @@ private:
     bool IsInsideScreen(const Point& p);
     bool IsInsideScreen(int32_t x, int32_t y);
     std::pair<int32_t, int32_t> GetPixelCoordinates(const Point& p);
+    std::pair<int32_t, int32_t> FindMinMaxIntersections(float x1, float y1, float x2, float y2, int32_t y);
+    std::pair<int32_t, int32_t> GetScanBounds(const Triangle& triangle, int32_t y);
     int32_t FromNDCToPixelCoordinate(float ndc, int32_t bound);
+    float FromPixelCoordinateToNDC(int32_t cord, int32_t bound);
     ani::RGB ToRGB(const glm::vec4& color);
     glm::vec4 Interpolate(const glm::vec4& v1, const glm::vec4& v2, float coef);
 

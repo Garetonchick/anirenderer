@@ -48,3 +48,4 @@ set_target_properties(
 add_subdirectory(window)
 add_subdirectory(utility)
 add_subdirectory(primitive_renderer)
+add_subdirectory(examples)
