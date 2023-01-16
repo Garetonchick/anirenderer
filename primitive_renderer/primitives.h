@@ -10,16 +10,26 @@
 namespace ani {
 
 struct Point {
-    glm::vec3 pos;
+    glm::vec4 pos;
     glm::vec4 color;
 };
 
 struct Segment {
-    Point points[2];
+    Point a;
+    Point b;
 };
 
 struct Triangle {
-    Point points[3];
+public:
+    Triangle(const Point& a, const Point& b, const Point& c);
+
+    const Point& GetPointA() const;
+    const Point& GetPointB() const;
+    const Point& GetPointC() const;
+    const Point& GetPoint(int32_t idx) const;
+
+private:
+    Point points_[3];
 };
 
 }  // namespace ani

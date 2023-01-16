@@ -13,8 +13,6 @@ int main() {
 
     ani::Image image;
     ani::PrimitiveRenderer renderer(window.GetWidth(), window.GetHeight());
-    size_t prev_wwidth = 0;
-    size_t prev_wheight = 0;
 
     while (window.IsOpen()) {
         window.PollEvents();
@@ -23,9 +21,9 @@ int main() {
 
         renderer.Clear({0, 0, 255});
 
-        ani::Triangle triangle = {.points = {ani::Point{.pos = {-0.5f, 0.5f, 0}, .color = {1.f, 0, 0, 1.f}}, 
-                                           ani::Point{.pos = {0.5f, 0.5f, 0}, .color = {1.f, 0, 0, 1.f}},
-                                           ani::Point{.pos = {0, -0.5f, 0}, .color = {1.f, 0, 0, 1.f}}}};
+        ani::Triangle triangle(ani::Point{.pos = {100, 100, 0, 1}, .color = {1.f, 0, 0, 1.f}}, 
+                                           ani::Point{.pos = {600, 100, 0, 1}, .color = {1.f, 0, 0, 1.f}},
+                                           ani::Point{.pos = {300, 500, 0, 1}, .color = {1.f, 0, 0, 1.f}});
 
         renderer.Render(triangle);
 
