@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <cmath>
 #include <iostream>
+#include "utility/image.h"
 
 namespace ani {
     PrimitiveRenderer::PrimitiveRenderer(uint32_t screen_width, uint32_t screen_height) : 
@@ -45,9 +46,11 @@ namespace ani {
         const Point& mid_y_point = *points[1]; 
         const Point& max_y_point = *points[2]; 
 
-        EdgeWalk long_edge(min_y_point, max_y_point);
-        EdgeWalk short_top_edge(min_y_point, mid_y_point);
-        EdgeWalk short_bottom_edge(mid_y_point, max_y_point);
+        Gradients gradients(triangle);
+
+        EdgeWalk long_edge(min_y_point, max_y_point, gradients);
+        EdgeWalk short_top_edge(min_y_point, mid_y_point, gradients);
+        EdgeWalk short_bottom_edge(mid_y_point, max_y_point, gradients);
 
         bool righthanded = glm::cross(glm::vec3(max_y_point.pos), glm::vec3(mid_y_point.pos)).z <= 0.0f;
 
@@ -73,8 +76,17 @@ namespace ani {
             int start_x = left_edge->GetCurrentX();
             int end_x = right_edge->GetCurrentX();
 
-            for(int32_t x = start_x; x < end_x; ++x) {
-                screen_.SetPixel(x, y, ani::RGB{0, 255, 0});
+            float lerp_amount = 0.0f; 
+
+            if(start_x != end_x) {
+                float lerp_step = 1.0f / (static_cast<float>(end_x) - static_cast<float>(start_x));
+
+                for(int32_t x = start_x; x < end_x; ++x, lerp_amount += lerp_step) {
+                    screen_.SetPixel(x, y, 
+                           NormalizedColorToRGB(Lerp(left_edge->GetCurrentColor(), right_edge->GetCurrentColor(), lerp_amount)));
+                    //screen_.SetPixel(x, y, 
+                           //NormalizedColorToRGB(left_edge->GetCurrentColor()));
+                }
             }
 
             left_edge->StepDown();

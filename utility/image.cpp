@@ -1,6 +1,11 @@
 #include <utility/image.h>
 
 namespace ani { 
+
+    RGB NormalizedColorToRGB(const glm::vec4& color) {
+        return RGB{static_cast<uint8_t>(color.r * 255.0f), static_cast<uint8_t>(color.g * 255.0f), static_cast<uint8_t>(color.b * 255.0f)};
+    }
+
     Image::Image(uint32_t width, uint32_t height, const RGB& color) : width_(width), height_(height), 
         data_(width_ * height_ * kChannelsNum) {
         Fill(color);

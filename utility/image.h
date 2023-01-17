@@ -1,4 +1,6 @@
 #pragma once
+#include <glm/vec4.hpp>
+
 #include <cstdint>
 #include <vector>
 
@@ -8,6 +10,8 @@ struct RGB {
     uint8_t g = 0;
     uint8_t b = 0;
 };
+
+RGB NormalizedColorToRGB(const glm::vec4& color);
 
 class Image {
 public:

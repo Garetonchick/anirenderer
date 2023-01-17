@@ -19,11 +19,11 @@ int main() {
 
         renderer.SetScreenSize(window.GetWidth(), window.GetHeight());
 
-        renderer.Clear({0, 0, 255});
+        renderer.Clear({50, 50, 50});
 
-        ani::Triangle triangle(ani::Point{.pos = {100, 100, 0, 1}, .color = {1.f, 0, 0, 1.f}}, 
-                                           ani::Point{.pos = {600, 100, 0, 1}, .color = {1.f, 0, 0, 1.f}},
-                                           ani::Point{.pos = {300, 500, 0, 1}, .color = {1.f, 0, 0, 1.f}});
+        ani::Triangle triangle(ani::Point{.pos = {100, 700, 0, 1}, .color = {1.f, 0, 0, 1.f}}, 
+                                           ani::Point{.pos = {700, 700, 0, 1}, .color = {0, 1.f, 0, 1.f}},
+                                           ani::Point{.pos = {400, 180, 0, 1}, .color = {0, 0, 1.f, 1.f}});
 
         renderer.Render(triangle);
 
