@@ -17,8 +17,6 @@ Gradients::Gradients(const Triangle& triangle) {
     // TODO: Optimize number of divisions
     x_color_slope_ = (y_dlt_ac * (b.color - c.color) + y_dlt_bc * (c.color - a.color)) / partial_denominator_for_x_slope;
     y_color_slope_ = (x_dlt_ac * (b.color - c.color) + x_dlt_bc * (c.color - a.color)) / partial_denominator_for_y_slope;
-    std::cout << "X color slope: " << x_color_slope_ << std::endl;
-    std::cout << "Y color slope: " << x_color_slope_ << std::endl;
 }
 
 const glm::vec4& Gradients::GetXColorSlope() const {

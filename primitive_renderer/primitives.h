@@ -23,10 +23,18 @@ struct Triangle {
 public:
     Triangle(const Point& a, const Point& b, const Point& c);
 
+    void Transform(const glm::mat4& trans);
+
+    Point& GetPointA();
+    Point& GetPointB();
+    Point& GetPointC();
+    Point& GetPoint(int32_t idx);
+
     const Point& GetPointA() const;
     const Point& GetPointB() const;
     const Point& GetPointC() const;
     const Point& GetPoint(int32_t idx) const;
+
 
 private:
     Point points_[3];

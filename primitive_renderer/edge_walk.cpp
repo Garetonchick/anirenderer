@@ -21,9 +21,6 @@ EdgeWalk::EdgeWalk(Point top, Point bottom, const Gradients& gradients)
     cur_color_ = top.color + x_prestep * gradients.GetXColorSlope() + y_prestep * gradients.GetYColorSlope();
     color_step_ = x_step_ * gradients.GetXColorSlope() + gradients.GetYColorSlope();  
 
-    std::cout << "Edge: " << top.pos.x << " " << top.pos.y << " " << bottom.pos.x << " " << bottom.pos.y << std::endl;
-    std::cout << "Color step is: " << color_step_.r << " " << color_step_.g << " " << color_step_.b << std::endl;
-
     UpdateAfterStep();
 }
 

@@ -17,11 +17,12 @@ public:
     void SetScreenSize(uint32_t screen_width, uint32_t screen_height);
     void Render(const Point& point);
     void Render(const Segment& segment);
-    void Render(const Triangle& triangle);
+    void Render(Triangle triangle);
 
     const Image& GetRendered() const;
 
 private:
+    void TransformPoint(Point* p);
     void ScanBetweenEdges(EdgeWalk* long_edge, EdgeWalk* short_edge, bool righthanded);
 
 private:
