@@ -14,6 +14,8 @@
 #include "utility/image.h"
 #include "utility/math.h"
 
+#define FACE_CULLING
+
 namespace ani {
     PrimitiveRenderer::PrimitiveRenderer(uint32_t screen_width, uint32_t screen_height) : 
         screen_(screen_width, screen_height), depth_buf_(screen_width, screen_height, -1.f) {
@@ -60,6 +62,14 @@ namespace ani {
         EdgeWalk short_bottom_edge(mid_y_point, max_y_point, gradients);
 
         bool righthanded = glm::cross(glm::vec3(max_y_point.pos - min_y_point.pos), glm::vec3(mid_y_point.pos - min_y_point.pos)).z < 0.0f;
+
+#ifdef FACE_CULLING
+        bool clockwise_winding_order = glm::cross(glm::vec3(triangle.GetPointB().pos - triangle.GetPointA().pos), glm::vec3(triangle.GetPointC().pos - triangle.GetPointA().pos)).z > 0.0f;
+
+        if(clockwise_winding_order) {
+            return;
+        }
+#endif 
 
         ScanBetweenEdges(&long_edge, &short_top_edge, righthanded);
         ScanBetweenEdges(&long_edge, &short_bottom_edge, righthanded);

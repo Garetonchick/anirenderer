@@ -14,3 +14,6 @@ target_link_libraries(test_primitive_renderer_triangles PRIVATE window primitive
 
 add_executable(test_primitive_renderer_transformations "tests/test_primitive_renderer_transformations.cpp")
 target_link_libraries(test_primitive_renderer_transformations PRIVATE window primitive_renderer sfml-graphics)
+
+add_executable(test_primitive_renderer_cube "tests/test_primitive_renderer_cube.cpp")
+target_link_libraries(test_primitive_renderer_cube PRIVATE window primitive_renderer sfml-graphics)
