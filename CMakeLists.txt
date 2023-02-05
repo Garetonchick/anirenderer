@@ -5,12 +5,12 @@ project(Anirenderer LANGUAGES CXX)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Flags for debug
-list(APPEND ANIRENDERER_DEBUG_FLAGS
-    -O0
+list(APPEND ANIRENDERER_FLAGS
+    -O3
+    -std=c++20
     -Wall
     -Wextra
     -Werror
-    -std=c++20
 )
 
 # Add roots of includes
@@ -32,8 +32,8 @@ target_link_libraries(sfml-includes INTERFACE sfml-graphics)
 
 # Create main executable
 add_executable(anirenderer main.cpp)
-target_compile_options(anirenderer PRIVATE ${ANIRENDERER_DEBUG_FLAGS})
-message(STATUS "Anirenderer debug flags are: ${ANIRENDERER_DEBUG_FLAGS}")
+target_compile_options(anirenderer PRIVATE ${ANIRENDERER_FLAGS})
+message(STATUS "Anirenderer flags are: ${ANIRENDERER_FLAGS}")
 
 # Link external dependencies to executable
 target_link_libraries(anirenderer PRIVATE sfml-graphics)
