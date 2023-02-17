@@ -12,6 +12,7 @@ struct RGB {
 };
 
 RGB NormalizedColorToRGB(const glm::vec4& color);
+glm::vec4 RGBToNormalizedColor(const ani::RGB& rgb);
 
 class Image {
 public:

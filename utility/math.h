@@ -10,7 +10,7 @@ T Lerp(const T& val1, const T& val2, float lerp_amount) {
 }
 
 inline glm::vec4 PerspectiveDivide(const glm::vec4& v) {
-    return glm::vec4{v.x / v.w, v.y / v.w, v.z / v.w, 1.f};
+    return glm::vec4{v.x / v.w, v.y / v.w, v.z / v.w, 1.0}; 
 }
 
 inline glm::mat4x4 ScreenSpaceTransformMatrix(int32_t width, int32_t height) {

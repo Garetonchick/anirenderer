@@ -15,8 +15,19 @@ Gradients::Gradients(const Triangle& triangle) {
     float partial_denominator_for_y_slope = -partial_denominator_for_x_slope;
 
     // TODO: Optimize number of divisions
-    x_color_slope_ = (y_dlt_ac * (b.color - c.color) + y_dlt_bc * (c.color - a.color)) / partial_denominator_for_x_slope;
-    y_color_slope_ = (x_dlt_ac * (b.color - c.color) + x_dlt_bc * (c.color - a.color)) / partial_denominator_for_y_slope;
+    auto calc_x_slope = [&](const auto& val_a, const auto& val_b, const auto& val_c) {
+        return (y_dlt_ac * (val_b - val_c) + y_dlt_bc * (val_c - val_a)) / partial_denominator_for_x_slope;
+    };
+
+    auto calc_y_slope = [&](const auto& val_a, const auto& val_b, const auto& val_c) {
+        return (x_dlt_ac * (val_b - val_c) + x_dlt_bc * (val_c - val_a)) / partial_denominator_for_y_slope;
+    };
+
+    x_color_slope_ = calc_x_slope(a.color, b.color, c.color); 
+    y_color_slope_ = calc_y_slope(a.color, b.color, c.color); 
+
+    x_tex_coord_slope_ = calc_x_slope(a.tex_coords, b.tex_coords, c.tex_coords); 
+    y_tex_coord_slope_ = calc_y_slope(a.tex_coords, b.tex_coords, c.tex_coords); 
 }
 
 const glm::vec4& Gradients::GetXColorSlope() const {
@@ -25,6 +36,14 @@ const glm::vec4& Gradients::GetXColorSlope() const {
 
 const glm::vec4& Gradients::GetYColorSlope() const {
     return y_color_slope_;
+}
+
+const glm::vec2& Gradients::GetXTexCoordSlope() const {
+    return x_tex_coord_slope_;
+}
+
+const glm::vec2& Gradients::GetYTexCoordSlope() const {
+    return y_tex_coord_slope_;
 }
 
 }

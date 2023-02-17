@@ -12,6 +12,7 @@ public:
     int32_t GetEndY() const;
     int32_t GetCurrentX() const;
     glm::vec4 GetCurrentColor() const;
+    glm::vec2 GetCurrentTexCoord() const;
 
     void StepDown();
 
@@ -31,6 +32,9 @@ private:
 
     glm::vec4 cur_color_;
     glm::vec4 color_step_;
+
+    glm::vec2 cur_tex_coord_;
+    glm::vec2 tex_coord_step_;
 };
 
 }  // namespace ani

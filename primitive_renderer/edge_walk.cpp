@@ -18,10 +18,17 @@ EdgeWalk::EdgeWalk(Point top, Point bottom, const Gradients& gradients)
     float x_prestep = y_prestep * x_step_;
 
     cur_x_ = top.pos.x + x_prestep;
+
     cur_color_ = top.color + x_prestep * gradients.GetXColorSlope() + y_prestep * gradients.GetYColorSlope();
     color_step_ = x_step_ * gradients.GetXColorSlope() + gradients.GetYColorSlope();  
 
-    UpdateAfterStep();
+    cur_tex_coord_ = top.tex_coords + 
+                     x_prestep * gradients.GetXTexCoordSlope() + 
+                     y_prestep * gradients.GetYTexCoordSlope();
+    tex_coord_step_ =  x_step_ * gradients.GetXTexCoordSlope() + gradients.GetYTexCoordSlope();
+
+    cur_int_x_ = std::ceil(cur_x_);
+    cur_x_prestep_ = static_cast<float>(cur_int_x_) - cur_x_;
 }
 
 int32_t EdgeWalk::GetBeginY() const {
@@ -40,6 +47,10 @@ glm::vec4 EdgeWalk::GetCurrentColor() const {
     return cur_color_ + cur_x_prestep_ * gradients_.GetXColorSlope(); 
 }
 
+glm::vec2 EdgeWalk::GetCurrentTexCoord() const {
+    return cur_tex_coord_ + cur_x_prestep_ * gradients_.GetXTexCoordSlope(); 
+}
+
 void EdgeWalk::StepDown() {
     cur_x_ += x_step_;
     UpdateAfterStep();
@@ -49,6 +60,7 @@ void EdgeWalk::UpdateAfterStep() {
     cur_int_x_ = std::ceil(cur_x_);
     cur_x_prestep_ = static_cast<float>(cur_int_x_) - cur_x_;
     cur_color_ += color_step_;
+    cur_tex_coord_ += tex_coord_step_;
 }
 
 }  // namespace ani

@@ -1,4 +1,10 @@
-add_library(primitive_renderer STATIC primitive_renderer.cpp primitives.cpp edge_walk.cpp gradients.cpp)
+add_library(primitive_renderer STATIC 
+    primitive_renderer.cpp 
+    primitives.cpp 
+    edge_walk.cpp 
+    gradients.cpp 
+    texture.cpp
+)
 target_link_libraries(primitive_renderer PRIVATE utility)
 target_compile_options(primitive_renderer PRIVATE ${ANIRENDERER_DEBUG_FLAGS})
 
@@ -17,3 +23,6 @@ target_link_libraries(test_primitive_renderer_transformations PRIVATE window pri
 
 add_executable(test_primitive_renderer_cube "tests/test_primitive_renderer_cube.cpp")
 target_link_libraries(test_primitive_renderer_cube PRIVATE window primitive_renderer sfml-graphics)
+
+add_executable(test_textures "tests/test_textures.cpp")
+target_link_libraries(test_textures PRIVATE window primitive_renderer sfml-graphics)
