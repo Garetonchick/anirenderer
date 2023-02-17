@@ -87,8 +87,8 @@ const Image& PrimitiveRenderer::GetRendered() const {
 void PrimitiveRenderer::TransformPoint(Point* p) {
     float w = p->pos.w; // Save w for perspective texturing
     p->pos = PerspectiveDivide(p->pos);
-    // TODO: Don't reconstruct matrix every time
     p->pos = ScreenSpaceTransformMatrix(screen_.GetWidth(), screen_.GetHeight()) * p->pos; 
+    // TODO: Don't reconstruct matrix every time
     p->pos.w = w;
 }
 
@@ -114,17 +114,22 @@ void PrimitiveRenderer::ScanBetweenEdges(EdgeWalk* long_edge, EdgeWalk* short_ed
         float lerp_amount = 0.0f;
 
         if (start_x != end_x) {
-            float lerp_step = 1.0f / (static_cast<float>(end_x) - static_cast<float>(start_x));
+            float lerp_step = 1.0f / (static_cast<float>(end_x) - static_cast<float>(start_x)); // sus
 
             for (int32_t x = start_x; x < end_x; ++x, lerp_amount += lerp_step) {
+                float inv_w = Lerp(left_edge->GetCurrentInvW(), right_edge->GetCurrentInvW(), lerp_amount); 
+                float w = 1.0 / inv_w; 
                 glm::vec4 color = glm::clamp(Lerp(left_edge->GetCurrentColor(),
-                                                  right_edge->GetCurrentColor(), lerp_amount),
+                                                  right_edge->GetCurrentColor(), lerp_amount) * w,
                                              0.f, 1.f);
                 glm::vec2 tex_coord = Lerp(left_edge->GetCurrentTexCoord(),
-                                          right_edge->GetCurrentTexCoord(), lerp_amount);
+                                           right_edge->GetCurrentTexCoord(), lerp_amount) * w;
                 glm::vec4 tex_color = texture.Sample(tex_coord);
+                // screen_.SetPixel(x, y, NormalizedColorToRGB(Mix(tex_color, color)));
                 screen_.SetPixel(x, y, NormalizedColorToRGB(tex_color));
-                //screen_.SetPixel(x, y, NormalizedColorToRGB({tex_coord.x, tex_coord.y, 0.f, 1.f}));
+                // screen_.SetPixel(x, y, NormalizedColorToRGB({tex_coord.x, tex_coord.y, 0.f, 1.f}));
+                // screen_.SetPixel(x, y, NormalizedColorToRGB(color));
+                // screen_.SetPixel(x, y, NormalizedColorToRGB({inv_w, inv_w, inv_w, 1.f}));
             }
         }
 

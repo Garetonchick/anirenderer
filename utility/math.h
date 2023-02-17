@@ -23,4 +23,8 @@ inline glm::mat4x4 ScreenSpaceTransformMatrix(int32_t width, int32_t height) {
                        {half_w, half_h, 0.f, 1.f}};
 }
 
+inline glm::vec4 Mix(glm::vec4& c1, glm::vec4& c2) {
+    return {c1.r * c2.r, c1.g * c2.g, c1.b * c2.b, c1.a * c2.a}; 
+}
+
 }

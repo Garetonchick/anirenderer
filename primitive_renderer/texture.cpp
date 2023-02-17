@@ -13,7 +13,7 @@ glm::vec4 Texture::Sample(glm::vec2 tex_coords) const {
 
 glm::vec4 Texture::Sample(float x, float y) const {
     if(!image_.GetHeight()) {
-        return {};
+        return {1.f, 1.f, 1.f, 1.f};
     }
 
     auto to_pixel_coord = [](float x, int32_t pixels_cnt) {
