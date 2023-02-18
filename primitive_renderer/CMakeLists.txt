@@ -26,3 +26,6 @@ target_link_libraries(test_primitive_renderer_cube PRIVATE window primitive_rend
 
 add_executable(test_textures "tests/test_textures.cpp")
 target_link_libraries(test_textures PRIVATE window primitive_renderer sfml-graphics)
+
+add_executable(test_clipping "tests/test_clipping.cpp")
+target_link_libraries(test_clipping PRIVATE window primitive_renderer sfml-graphics)

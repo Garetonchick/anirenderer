@@ -6,6 +6,7 @@
 
 #include <cstdint>
 #include <array>
+#include <stdexcept>
 
 namespace ani {
 
@@ -13,6 +14,8 @@ struct Point {
     glm::vec4 pos;
     glm::vec4 color;
     glm::vec2 tex_coords;
+
+    Point Lerp(const Point& o, float lerp_amount) const;
 };
 
 struct Segment {

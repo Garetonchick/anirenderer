@@ -1,7 +1,17 @@
 #include <primitive_renderer/primitives.h>
+#include <utility/math.h>
 #include <stdexcept>
 
 namespace ani {
+
+Point Point::Lerp(const Point& o, float lerp_amount) const {
+    Point p;
+    p.pos = ani::Lerp(pos, o.pos, lerp_amount);
+    p.color = ani::Lerp(color, o.color, lerp_amount);
+    p.tex_coords = ani::Lerp(tex_coords, o.tex_coords, lerp_amount);
+
+    return p;
+}
 
 Triangle::Triangle(const Point& a, const Point& b, const Point& c) {
     points_[0] = a;

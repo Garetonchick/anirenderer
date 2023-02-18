@@ -5,7 +5,7 @@ namespace ani {
 
 class Gradients {
 public:
-    explicit Gradients(const Triangle& triangle);
+    explicit Gradients(const Point& a, const Point& b, const Point& c);
 
     const glm::vec4& GetXColorSlope() const;
     const glm::vec4& GetYColorSlope() const;

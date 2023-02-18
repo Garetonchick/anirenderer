@@ -2,10 +2,7 @@
 
 namespace ani {
 
-Gradients::Gradients(const Triangle& triangle) {
-    const Point& a = triangle.GetPointA();
-    const Point& b = triangle.GetPointB();
-    const Point& c = triangle.GetPointC();
+Gradients::Gradients(const Point& a, const Point& b, const Point& c) {
     float x_dlt_bc = b.pos.x - c.pos.x;
     float x_dlt_ac = a.pos.x - c.pos.x;
     float y_dlt_bc = b.pos.y - c.pos.y;
