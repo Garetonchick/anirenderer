@@ -42,6 +42,9 @@ Gradients::Gradients(const Point& a, const Point& b, const Point& c) {
 
     x_tex_coord_slope_ = calc_x_slope(a.tex_coords, b.tex_coords, c.tex_coords); 
     y_tex_coord_slope_ = calc_y_slope(a.tex_coords, b.tex_coords, c.tex_coords); 
+
+    x_z_slope_ = calc_x_slope(a.pos.z, b.pos.z, c.pos.z);
+    y_z_slope_ = calc_y_slope(a.pos.z, b.pos.z, c.pos.z);
 }
 
 const glm::vec4& Gradients::GetXColorSlope() const {
@@ -66,6 +69,13 @@ float Gradients::GetXInvWSlope() const {
 
 float Gradients::GetYInvWSlope() const {
     return y_inv_w_slope_;
+}
+
+float Gradients::GetXZSlope() const {
+    return x_z_slope_;
+}
+float Gradients::GetYZSlope() const {
+    return y_z_slope_;
 }
 
 }

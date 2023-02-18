@@ -14,15 +14,16 @@
 #include "utility/image.h"
 #include "utility/math.h"
 
-// #define FACE_CULLING
+//#define FACE_CULLING
 
 namespace ani {
 PrimitiveRenderer::PrimitiveRenderer(uint32_t screen_width, uint32_t screen_height)
-    : screen_(screen_width, screen_height), depth_buf_(screen_width, screen_height, -1.f) {
+    : screen_(screen_width, screen_height), depth_buf_(screen_width, screen_height, 1.f) {
 }
 
 void PrimitiveRenderer::Clear(const RGB& color) {
     screen_.Fill(color);
+    depth_buf_.Fill(1.f);
 }
 
 void PrimitiveRenderer::SetScreenSize(uint32_t screen_width, uint32_t screen_height) {
@@ -82,8 +83,8 @@ void PrimitiveRenderer::RenderTriangle(Point* p1, Point* p2, Point* p3, const Te
     // TODO: Remove preprocessor
 #ifdef FACE_CULLING
     bool clockwise_winding_order =
-        glm::cross(glm::vec3(triangle.GetPointB().pos - triangle.GetPointA().pos),
-                   glm::vec3(triangle.GetPointC().pos - triangle.GetPointA().pos))
+        glm::cross(glm::vec3(p2->pos - p1->pos),
+                   glm::vec3(p3->pos - p1->pos))
             .z > 0.0f;
 
     if (clockwise_winding_order) {
@@ -130,17 +131,22 @@ void PrimitiveRenderer::ScanBetweenEdges(EdgeWalk* long_edge, EdgeWalk* short_ed
             for (int32_t x = start_x; x < end_x; ++x, lerp_amount += lerp_step) {
                 float inv_w = Lerp(left_edge->GetCurrentInvW(), right_edge->GetCurrentInvW(), lerp_amount); 
                 float w = 1.0 / inv_w; 
-                glm::vec4 color = glm::clamp(Lerp(left_edge->GetCurrentColor(),
-                                                right_edge->GetCurrentColor(), lerp_amount) * w,
-                                            0.f, 1.f);
-                glm::vec2 tex_coord = Lerp(left_edge->GetCurrentTexCoord(),
-                                        right_edge->GetCurrentTexCoord(), lerp_amount) * w;
-                glm::vec4 tex_color = texture.Sample(tex_coord);
-                screen_.SetPixel(x, y, NormalizedColorToRGB(Mix(tex_color, color)));
-                // screen_.SetPixel(x, y, NormalizedColorToRGB(tex_color));
-                // screen_.SetPixel(x, y, NormalizedColorToRGB({tex_coord.x, tex_coord.y, 0.f, 1.f}));
-                // screen_.SetPixel(x, y, NormalizedColorToRGB(color));
-                // screen_.SetPixel(x, y, NormalizedColorToRGB({inv_w, inv_w, inv_w, 1.f}));
+                float z = Lerp(left_edge->GetCurrentZ(), right_edge->GetCurrentZ(), lerp_amount) * w;
+                if(z < depth_buf_.Get(y, x)) {
+                    depth_buf_.Set(y, x, z);
+
+                    glm::vec4 color = glm::clamp(Lerp(left_edge->GetCurrentColor(),
+                                                    right_edge->GetCurrentColor(), lerp_amount) * w,
+                                                0.f, 1.f);
+                    glm::vec2 tex_coord = Lerp(left_edge->GetCurrentTexCoord(),
+                                            right_edge->GetCurrentTexCoord(), lerp_amount) * w;
+                    glm::vec4 tex_color = texture.Sample(tex_coord);
+                    screen_.SetPixel(x, y, NormalizedColorToRGB(Mix(tex_color, color)));
+                    // screen_.SetPixel(x, y, NormalizedColorToRGB(tex_color));
+                    // screen_.SetPixel(x, y, NormalizedColorToRGB({tex_coord.x, tex_coord.y, 0.f, 1.f}));
+                    // screen_.SetPixel(x, y, NormalizedColorToRGB(color));
+                    // screen_.SetPixel(x, y, NormalizedColorToRGB({inv_w, inv_w, inv_w, 1.f}));
+                }
             }
         }
 

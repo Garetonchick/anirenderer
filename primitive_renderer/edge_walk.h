@@ -14,6 +14,7 @@ public:
     glm::vec4 GetCurrentColor() const;
     glm::vec2 GetCurrentTexCoord() const;
     float GetCurrentInvW() const;
+    float GetCurrentZ() const;
 
     void StepDown();
 
@@ -39,6 +40,9 @@ private:
 
     float cur_inv_w_;
     float inv_w_step_;
+
+    float cur_z_;
+    float z_step_;
 };
 
 }  // namespace ani

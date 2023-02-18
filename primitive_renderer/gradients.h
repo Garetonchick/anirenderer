@@ -13,6 +13,8 @@ public:
     const glm::vec2& GetYTexCoordSlope() const;
     float GetXInvWSlope() const;
     float GetYInvWSlope() const;
+    float GetXZSlope() const;
+    float GetYZSlope() const;
 
 private:
     glm::vec4 x_color_slope_; 
@@ -21,6 +23,8 @@ private:
     glm::vec2 y_tex_coord_slope_;
     float x_inv_w_slope_;
     float y_inv_w_slope_;
+    float x_z_slope_;
+    float y_z_slope_;
 };
 
 }

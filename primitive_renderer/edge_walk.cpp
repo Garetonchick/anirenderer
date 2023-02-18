@@ -33,6 +33,11 @@ EdgeWalk::EdgeWalk(Point top, Point bottom, const Gradients& gradients)
                  y_prestep * gradients.GetYInvWSlope();
     inv_w_step_ = x_step_ * gradients.GetXInvWSlope() + gradients.GetYInvWSlope();
 
+    cur_z_ = top.pos.z * top_inv_w + 
+            x_prestep * gradients.GetXZSlope() +
+            y_prestep * gradients.GetYZSlope();
+    z_step_ = x_step_ * gradients.GetXZSlope() + gradients.GetYZSlope(); 
+
     cur_int_x_ = std::ceil(cur_x_);
     cur_x_prestep_ = static_cast<float>(cur_int_x_) - cur_x_;
 }
@@ -61,6 +66,10 @@ float EdgeWalk::GetCurrentInvW() const {
     return cur_inv_w_ + cur_x_prestep_ * gradients_.GetXInvWSlope(); 
 }
 
+float EdgeWalk::GetCurrentZ() const {
+    return cur_z_ + cur_x_prestep_ * gradients_.GetXZSlope(); 
+}
+
 void EdgeWalk::StepDown() {
     cur_x_ += x_step_;
     UpdateAfterStep();
@@ -72,6 +81,7 @@ void EdgeWalk::UpdateAfterStep() {
     cur_color_ += color_step_;
     cur_tex_coord_ += tex_coord_step_;
     cur_inv_w_ += inv_w_step_;
+    cur_z_ += z_step_;
 }
 
 }  // namespace ani
