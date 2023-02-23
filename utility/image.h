@@ -14,6 +14,8 @@ struct RGB {
 RGB NormalizedColorToRGB(const glm::vec4& color);
 glm::vec4 RGBToNormalizedColor(const ani::RGB& rgb);
 
+glm::vec4 RandomColor();
+
 class Image {
 public:
     explicit Image(uint32_t width = 0, uint32_t height = 0, const RGB& color = {});

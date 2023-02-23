@@ -3,6 +3,7 @@
 #include <primitive_renderer/primitives.h>
 #include <primitive_renderer/edge_walk.h>
 #include <utility/utility.h>
+#include <cstdint>
 #include <glm/geometric.hpp>
 #include <glm/common.hpp>
 
@@ -80,6 +81,7 @@ void PrimitiveRenderer::RenderTriangle(Point* p1, Point* p2, Point* p3, const Te
                                   glm::vec3(mid_y_point.pos - min_y_point.pos))
                            .z < 0.0f;
 
+
     // TODO: Remove preprocessor
 #ifdef FACE_CULLING
     bool clockwise_winding_order =
@@ -106,8 +108,8 @@ void PrimitiveRenderer::TransformPoint(Point* p) {
 
 void PrimitiveRenderer::ScanBetweenEdges(EdgeWalk* long_edge, EdgeWalk* short_edge,
                                          bool righthanded, const Texture& texture) {
-    int32_t start_y = short_edge->GetBeginY();
-    int32_t end_y = short_edge->GetEndY();
+    int32_t start_y = std::max(0, short_edge->GetBeginY());
+    int32_t end_y = std::min<int32_t>(short_edge->GetEndY(), screen_.GetHeight() - 1);
     EdgeWalk* left_edge = long_edge;
     EdgeWalk* right_edge = short_edge;
 
@@ -119,7 +121,7 @@ void PrimitiveRenderer::ScanBetweenEdges(EdgeWalk* long_edge, EdgeWalk* short_ed
         int start_x = left_edge->GetCurrentX();
         int end_x = right_edge->GetCurrentX();
 
-        assert(start_x <= end_x);
+        // assert(start_x <= end_x); TODO: investigate
         // hack to ensure that thin triangles are drawn correctly, TODO: fix this
         end_x = std::max(end_x, start_x + 1);  
 

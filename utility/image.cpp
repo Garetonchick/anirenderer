@@ -1,4 +1,5 @@
 #include <utility/image.h>
+#include <utility/random.h>
 
 namespace ani { 
 
@@ -12,6 +13,13 @@ namespace ani {
         return glm::vec4{static_cast<float>(rgb.r) / 255.f, 
                          static_cast<float>(rgb.g) / 255.f, 
                          static_cast<float>(rgb.b) / 255.f, 1.f};
+    }
+
+    glm::vec4 RandomColor() {
+        return glm::vec4{ RandomReal(0.f, 1.f),
+                          RandomReal(0.f, 1.f),
+                          RandomReal(0.f, 1.f),
+                          1.f }; 
     }
 
     Image::Image(uint32_t width, uint32_t height, const RGB& color) : width_(width), height_(height), 
