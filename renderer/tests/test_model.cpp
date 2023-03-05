@@ -30,7 +30,7 @@ int main() {
 
         glm::mat4 model(1.f);
         float rotation_angle = 91.f;
-        model = glm::scale(model, glm::vec3{0.4f, 0.4f, 0.4f});
+        // model = glm::scale(model, glm::vec3{0.4f, 0.4f, 0.4f});
         model = glm::rotate(model, glm::radians(clock.getElapsedTime().asSeconds() * kRotationSpeed), glm::vec3{0.f, 1.f, 0.f});
 
         glm::mat4 view(1.f);
@@ -47,7 +47,6 @@ int main() {
         renderer.Render(teapot, trans);
         // std::cout << "After render" << std::endl;
         // std::cout.flush();
-
 
         window.Display(renderer.GetRendered());
     }

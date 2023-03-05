@@ -38,12 +38,12 @@ int main() {
 
     ani::PrimitiveRenderer renderer(window.GetWidth(), window.GetHeight());
 
-    glm::vec4 p1 = {-0.5f, -0.5f, 0.f, 1.f};
-    glm::vec4 p2 = {0.f, 0.5f, 0.f, 1.f};
-    glm::vec4 p3 = {0.5f, -0.5f, 0.f, 1.f};
     // glm::vec4 p1 = {-0.5f, -0.5f, 0.f, 1.f};
     // glm::vec4 p2 = {0.f, 0.5f, 0.f, 1.f};
-    // glm::vec4 p3 = {0.5f, 0.0f, 0.f, 1.f};
+    // glm::vec4 p3 = {0.5f, -0.5f, 0.f, 1.f};
+    glm::vec4 p1 = {-1.2f, -1.2f, 0.f, 1.f};
+    glm::vec4 p2 = {0.f, 1.2f, 0.f, 1.f};
+    glm::vec4 p3 = {1.2f, 0.0f, 0.f, 1.f};
 
     while (window.IsOpen()) {
         window.PollEvents();
@@ -58,6 +58,7 @@ int main() {
 
         glm::mat4 model(1.f);
         float rotation_angle = 40.f;
+        model = glm::translate(model, {-4.f, 0.f, 0.f});
         model = glm::scale(model, glm::vec3{4.f});
         model = glm::rotate(model, glm::radians(clock.getElapsedTime().asSeconds() * kRotationSpeed), glm::vec3{0.f, 1.f, 0.f});
         // model = glm::translate(model, {0.f, -0.1f, 0.f});

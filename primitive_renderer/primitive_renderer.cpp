@@ -15,7 +15,7 @@
 #include "utility/image.h"
 #include "utility/math.h"
 
-//#define FACE_CULLING
+#define FACE_CULLING
 
 namespace ani {
 PrimitiveRenderer::PrimitiveRenderer(uint32_t screen_width, uint32_t screen_height)
@@ -48,8 +48,9 @@ void PrimitiveRenderer::Render(const Triangle& triangle, const Texture& texture)
 
     for(int i = 1; i + 1 < points.size(); ++i) {
         Point p0_copy = points[0];
+        Point pi_copy = points[i];
         Point p_i_next_copy = points[i + 1];
-        RenderTriangle(&p0_copy, &points[i], &p_i_next_copy, texture);
+        RenderTriangle(&p0_copy, &pi_copy, &p_i_next_copy, texture);
     }
 }
 
@@ -93,7 +94,6 @@ void PrimitiveRenderer::RenderTriangle(Point* p1, Point* p2, Point* p3, const Te
         return;
     }
 #endif
-
     ScanBetweenEdges(&long_edge, &short_top_edge, righthanded, texture);
     ScanBetweenEdges(&long_edge, &short_bottom_edge, righthanded, texture);
 }
@@ -130,6 +130,7 @@ void PrimitiveRenderer::ScanBetweenEdges(EdgeWalk* long_edge, EdgeWalk* short_ed
         if (start_x != end_x) {
             float lerp_step = 1.0f / (static_cast<float>(end_x) - static_cast<float>(start_x)); // sus
 
+            // std::cerr << "Before line scan" << std::endl;
             for (int32_t x = start_x; x < end_x; ++x, lerp_amount += lerp_step) {
                 float inv_w = Lerp(left_edge->GetCurrentInvW(), right_edge->GetCurrentInvW(), lerp_amount); 
                 float w = 1.0 / inv_w; 
@@ -143,6 +144,7 @@ void PrimitiveRenderer::ScanBetweenEdges(EdgeWalk* long_edge, EdgeWalk* short_ed
                     glm::vec2 tex_coord = Lerp(left_edge->GetCurrentTexCoord(),
                                             right_edge->GetCurrentTexCoord(), lerp_amount) * w;
                     glm::vec4 tex_color = texture.Sample(tex_coord);
+                    // assert(x >= 0 && y >= 0 && x < screen_.GetWidth() && y < screen_.GetHeight());
                     screen_.SetPixel(x, y, NormalizedColorToRGB(Mix(tex_color, color)));
                     // screen_.SetPixel(x, y, NormalizedColorToRGB(tex_color));
                     // screen_.SetPixel(x, y, NormalizedColorToRGB({tex_coord.x, tex_coord.y, 0.f, 1.f}));
@@ -151,6 +153,7 @@ void PrimitiveRenderer::ScanBetweenEdges(EdgeWalk* long_edge, EdgeWalk* short_ed
                 }
             }
         }
+
 
         left_edge->StepDown();
         right_edge->StepDown();
@@ -161,8 +164,11 @@ std::vector<Point> PrimitiveRenderer::ClipTriangle(const Triangle& triangle) {
     std::vector<Point> points = { triangle.GetPointA(), triangle.GetPointB(), triangle.GetPointC() };
     std::vector<Point> buf;
     buf.reserve(6);
-    ClipAxis(&points, &buf, 0) && ClipAxis(&points, &buf, 1) && ClipAxis(&points, &buf, 2);
-    return points;
+    if(ClipAxis(&points, &buf, 0) && ClipAxis(&points, &buf, 1) && ClipAxis(&points, &buf, 2)) {
+        return points;
+    }
+
+    return {};
 }
 
 bool PrimitiveRenderer::ClipAxis(std::vector<Point>* in, std::vector<Point>* buf, int axis_idx) {
