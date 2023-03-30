@@ -8,56 +8,50 @@
 #include <string_view>
 #include <memory>
 #include <functional>
+#include "SFML/Graphics/RenderWindow.hpp"
 #include "SFML/Window/Keyboard.hpp"
 
 namespace ani {
 
-class Window {
+enum class CursorState { NORMAL, LOCKED_INSIDE };
+
+class Window : private sf::RenderWindow {
 public:
     Window(uint32_t width, uint32_t height, const std::string& title = "aniwindow");
 
     bool IsOpen() const;
     bool IsKeyPressed(sf::Keyboard::Key key) const;
-    uint32_t GetWidth() const;
-    uint32_t GetHeight() const;
+    bool IsMouseButtonPressed(sf::Mouse::Button button) const;
+    float GetWidth() const;
+    float GetHeight() const;
+    CursorState GetCursorState() const;
 
-    void SetSize(uint32_t width, uint32_t height);
     void Display(const Image& image);
     void Clear(const RGB& color = {0, 255, 0});
+    void Close();
     void PollEvents();
-    void SetGrabCursor(bool grab);
-    void SetCursorVisible(bool visible);
-
-    void SetMouseMovedCallback(const std::function<void(int, int)>& callback);
+    void SetSize(uint32_t width, uint32_t height);
+    void SetCursorState(CursorState cursor_state);
+    void SetCursorMovedCallback(const std::function<void(int, int)>& callback);
+    void SetMouseScrolledCallback(const std::function<void(float)>& callback);
 
 private:
     void Reset();
+    void HandleCursorMoved();
 
-private:
-    class AdaptedSFMLWindow : public sf::RenderWindow {
-        using sf::RenderWindow::RenderWindow;
-
-    public:
-        void SetResizeCallback(std::function<void()> on_resize);
-
-    protected:
-        void onResize() override;
-
-    private:
-        std::function<void()> on_resize_;
-    };
+    void onResize() override;
 
 private:
     static const uint32_t kColorChannelsNum = 4;
 
-    AdaptedSFMLWindow sfml_window_;
     sf::Texture texture_;
     sf::Sprite sprite_;
-    std::unique_ptr<uint8_t[]> screen_buf_;
-    bool is_cursor_grabbed_;
 
-    // Callbacks
-    std::function<void(int, int)> mouse_moved_callback_ = [](int, int){};
+    CursorState cursor_state_ = CursorState::NORMAL;
+    bool first_cursor_move_ = true;
+
+    std::function<void(int, int)> cursor_moved_callback_ = [](int, int) {};
+    std::function<void(float)> mouse_scrolled_callback_ = [](float) {};
 };
 
 }  // namespace ani

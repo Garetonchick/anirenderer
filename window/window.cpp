@@ -3,124 +3,139 @@
 #include <stdexcept>
 #include <algorithm>
 #include <iostream>
+#include "SFML/Graphics/RenderWindow.hpp"
 #include "SFML/System/Vector2.hpp"
 #include "SFML/Window/Event.hpp"
 #include "SFML/Window/Keyboard.hpp"
 
 namespace ani {
 
-// Public members
-
 Window::Window(uint32_t width, uint32_t height, const std::string& title)
-    : sfml_window_(sf::VideoMode(width, height), title.c_str()) {
-    sfml_window_.SetResizeCallback([this]() {
-        this->Reset();
-        this->Clear();
-    });
+    : sf::RenderWindow(sf::VideoMode(width, height), title.c_str()) {
     Reset();
     Clear();
 }
 
 bool Window::IsOpen() const {
-    return sfml_window_.isOpen();
+    return sf::RenderWindow::isOpen();
 }
 
 bool Window::IsKeyPressed(sf::Keyboard::Key key) const {
     return sf::Keyboard::isKeyPressed(key);
 }
 
-uint32_t Window::GetWidth() const {
-    return sfml_window_.getSize().x;
+bool Window::IsMouseButtonPressed(sf::Mouse::Button button) const {
+    return sf::Mouse::isButtonPressed(button);
 }
 
-uint32_t Window::GetHeight() const {
-    return sfml_window_.getSize().y;
+float Window::GetWidth() const {
+    return static_cast<float>(sf::RenderWindow::getSize().x);
+}
+
+float Window::GetHeight() const {
+    return static_cast<float>(sf::RenderWindow::getSize().y);
+}
+
+CursorState Window::GetCursorState() const {
+    return cursor_state_;
 }
 
 void Window::SetSize(uint32_t width, uint32_t height) {
-    sfml_window_.setSize({width, height});
+    sf::RenderWindow::setSize({width, height});
     Reset();
     Clear();
 }
 
 void Window::Display(const Image& image) {
     texture_.update(image.GetRawRGBA());
-    sfml_window_.draw(sprite_);
-    sfml_window_.display();
+    sf::RenderWindow::draw(sprite_);
+    sf::RenderWindow::display();
 }
 
 void Window::Clear(const RGB& color) {
-    sfml_window_.clear({color.r, color.g, color.b});
+    sf::RenderWindow::clear({color.r, color.g, color.b});
+}
+
+void Window::Close() {
+    sf::RenderWindow::close();
 }
 
 void Window::PollEvents() {
     sf::Event event;
 
-    while (sfml_window_.pollEvent(event)) {
+    while (sf::RenderWindow::pollEvent(event)) {
         if (event.type == sf::Event::Closed) {
-            sfml_window_.close();
-        } else if(event.type == sf::Event::KeyPressed) {
-            if(event.key.code == sf::Keyboard::Escape) {
-                sfml_window_.close();
-            }
+            sf::RenderWindow::close();
+        } else if (event.type == sf::Event::MouseWheelScrolled) {
+            mouse_scrolled_callback_(event.mouseWheelScroll.delta);
         }
     }
 
-    static bool first_time = true;
+    HandleCursorMoved();
+}
 
-    if(is_cursor_grabbed_) {
-        auto cursor_pos = sf::Mouse::getPosition();
-        auto window_center = sfml_window_.getPosition() + sf::Vector2i(GetWidth() / 2, GetHeight() / 2);
+void Window::SetCursorState(CursorState cursor_state) {
+    if (cursor_state == cursor_state_) {
+        return;
+    }
 
-        if(first_time) {
-            first_time = false;
-        } else {
-            mouse_moved_callback_(cursor_pos.x - window_center.x, cursor_pos.y - window_center.y);
-        }
+    cursor_state_ = cursor_state;
+    first_cursor_move_ = true;
 
-            sf::Mouse::setPosition(window_center);
-    } else {
-        first_time = true;
+    if (cursor_state == CursorState::NORMAL) {
+        sf::RenderWindow::setMouseCursorGrabbed(false);
+        sf::RenderWindow::setMouseCursorVisible(true);
+    } else if (cursor_state == CursorState::LOCKED_INSIDE) {
+        sf::RenderWindow::setMouseCursorGrabbed(true);
+        sf::RenderWindow::setMouseCursorVisible(false);
     }
 }
 
-void Window::SetGrabCursor(bool grab) {
-    sfml_window_.setMouseCursorGrabbed(grab);
-    is_cursor_grabbed_ = grab;
+void Window::SetCursorMovedCallback(const std::function<void(int, int)>& callback) {
+    cursor_moved_callback_ = callback;
 }
 
-void Window::SetCursorVisible(bool visible) {
-    sfml_window_.setMouseCursorVisible(visible);
+void Window::SetMouseScrolledCallback(const std::function<void(float)>& callback) {
+    mouse_scrolled_callback_ = callback;
 }
-
-void Window::SetMouseMovedCallback(const std::function<void(int, int)>& callback) {
-    mouse_moved_callback_ = callback;
-}
-
-// Private members
 
 void Window::Reset() {
-    sfml_window_.setView(
-        sf::View({static_cast<float>(GetWidth()) / 2.f, static_cast<float>(GetHeight()) / 2.f},
-                 {static_cast<float>(GetWidth()), static_cast<float>(GetHeight())}));
+    sf::RenderWindow::setView(
+        sf::View({GetWidth() / 2.f, GetHeight() / 2.f}, {GetWidth(), GetHeight()}));
 
     if (!texture_.create(GetWidth(), GetHeight())) {
         throw std::runtime_error("Couldn't create sfml texture");
     }
 
     sprite_.setTexture(texture_, true);
-
-    screen_buf_ = std::make_unique<uint8_t[]>(kColorChannelsNum * GetWidth() * GetHeight());
 }
 
-// AdaptedSFMLWindow
+void Window::HandleCursorMoved() {
+    if (cursor_state_ == CursorState::LOCKED_INSIDE) {
+        auto cursor_pos = sf::Mouse::getPosition();
+        auto window_center =
+            sf::RenderWindow::getPosition() + sf::Vector2i(GetWidth() / 2, GetHeight() / 2);
 
-void Window::AdaptedSFMLWindow::SetResizeCallback(std::function<void()> on_resize) {
-    on_resize_ = on_resize;
+        if (first_cursor_move_) {
+            first_cursor_move_ = false;
+        } else {
+            cursor_moved_callback_(cursor_pos.x - window_center.x, cursor_pos.y - window_center.y);
+        }
+
+        sf::Mouse::setPosition(window_center);
+    } else if (cursor_state_ == CursorState::NORMAL) {
+        auto cursor_pos = sf::Mouse::getPosition();
+        static auto prev_cursor_pos = cursor_pos;
+
+        cursor_moved_callback_(cursor_pos.x - prev_cursor_pos.x, cursor_pos.y - prev_cursor_pos.y);
+
+        prev_cursor_pos = cursor_pos;
+    }
 }
 
-void Window::AdaptedSFMLWindow::onResize() {
-    on_resize_();
+void Window::onResize() {
+    Reset();
+    Clear();
 }
 
 }  // namespace ani

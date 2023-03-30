@@ -20,6 +20,7 @@ glm::vec3 camera_pos = glm::vec3{0.f, 0.4f, 3.f};
 float camera_pitch = 0.0f;
 float camera_yaw = 0.0f;
 float sensitivity = 0.1f;
+bool is_mouse_locked = true;
 
 glm::vec3 GetDirUnitVec(float pitch, float yaw) {
     pitch = glm::radians(pitch);
@@ -38,6 +39,10 @@ glm::mat4 GetCameraRotationMat(float pitch, float yaw) {
 }
 
 void MoveMouseCallback(int dx, int dy) {
+    if(!is_mouse_locked) {
+        return;
+    }
+
     camera_pitch = std::clamp(camera_pitch + 1.f * dy * sensitivity, -89.f, 89.f);
     camera_yaw = camera_yaw + 1.f * dx * sensitivity;
 
@@ -88,18 +93,15 @@ void Update(ani::Window* window, float dt) {
     } 
 
     static bool released_c = true;
-    static bool captured_cursor = true;
 
     if(window->IsKeyPressed(sf::Keyboard::C)) {
         if(released_c) {
-            captured_cursor = !captured_cursor;
-
-            if(captured_cursor) {
-                window->SetCursorVisible(false);
-                window->SetGrabCursor(true);
+            is_mouse_locked = !is_mouse_locked;
+            
+            if(window->GetCursorState() == ani::CursorState::LOCKED_INSIDE) {
+                window->SetCursorState(ani::CursorState::NORMAL);
             } else {
-                window->SetCursorVisible(true);
-                window->SetGrabCursor(false);
+                window->SetCursorState(ani::CursorState::LOCKED_INSIDE);
             }
         }
 
@@ -107,14 +109,18 @@ void Update(ani::Window* window, float dt) {
     } else {
         released_c = true;
     } 
+
+    if(window->IsKeyPressed(sf::Keyboard::Escape)) {
+        window->Close();
+    }
 }
 
 int main() {
     ani::Window window(600, 600);
 
-    window.SetCursorVisible(false);
-    window.SetGrabCursor(true);
-    window.SetMouseMovedCallback(MoveMouseCallback);
+    is_mouse_locked = true;
+    window.SetCursorState(ani::CursorState::LOCKED_INSIDE);
+    window.SetCursorMovedCallback(MoveMouseCallback);
 
     ani::Renderer renderer(window.GetWidth(), window.GetHeight());
     ani::Model teapot("/home/gareton/repos/anirenderer/assets/teapot/teapot.obj");
