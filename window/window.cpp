@@ -3,6 +3,9 @@
 #include <stdexcept>
 #include <algorithm>
 #include <iostream>
+#include "SFML/System/Vector2.hpp"
+#include "SFML/Window/Event.hpp"
+#include "SFML/Window/Keyboard.hpp"
 
 namespace ani {
 
@@ -20,6 +23,10 @@ Window::Window(uint32_t width, uint32_t height, const std::string& title)
 
 bool Window::IsOpen() const {
     return sfml_window_.isOpen();
+}
+
+bool Window::IsKeyPressed(sf::Keyboard::Key key) const {
+    return sf::Keyboard::isKeyPressed(key);
 }
 
 uint32_t Window::GetWidth() const {
@@ -52,10 +59,42 @@ void Window::PollEvents() {
     while (sfml_window_.pollEvent(event)) {
         if (event.type == sf::Event::Closed) {
             sfml_window_.close();
+        } else if(event.type == sf::Event::KeyPressed) {
+            if(event.key.code == sf::Keyboard::Escape) {
+                sfml_window_.close();
+            }
+        }
+    }
+
+    static bool first_time = true;
+
+    if(is_cursor_grabbed_) {
+        auto cursor_pos = sf::Mouse::getPosition();
+        auto window_center = sfml_window_.getPosition() + sf::Vector2i(GetWidth() / 2, GetHeight() / 2);
+
+        if(first_time) {
+            first_time = false;
+        } else {
+            mouse_moved_callback_(cursor_pos.x - window_center.x, cursor_pos.y - window_center.y);
         }
 
-        // TODO: Call subscribed callbacks for different types of events
+            sf::Mouse::setPosition(window_center);
+    } else {
+        first_time = true;
     }
+}
+
+void Window::SetGrabCursor(bool grab) {
+    sfml_window_.setMouseCursorGrabbed(grab);
+    is_cursor_grabbed_ = grab;
+}
+
+void Window::SetCursorVisible(bool visible) {
+    sfml_window_.setMouseCursorVisible(visible);
+}
+
+void Window::SetMouseMovedCallback(const std::function<void(int, int)>& callback) {
+    mouse_moved_callback_ = callback;
 }
 
 // Private members
