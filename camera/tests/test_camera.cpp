@@ -9,48 +9,24 @@
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
 #include "SFML/Window/Keyboard.hpp"
+#include "camera/camera.h"
 #include "glm/geometric.hpp"
 
 const float kRotationSpeed = 0.f;
 const float kMovementSpeed = 0.01f;
 
 sf::Clock coc;
+ani::Camera camera({0.f, 0.f, 10.f});
 
-glm::vec3 camera_pos = glm::vec3{0.f, 0.4f, 3.f};
-float camera_pitch = 0.0f;
-float camera_yaw = 0.0f;
 float sensitivity = 0.1f;
 bool is_mouse_locked = true;
-
-glm::vec3 GetDirUnitVec(float pitch, float yaw) {
-    pitch = glm::radians(pitch);
-    yaw = glm::radians(yaw);
-    glm::vec3 dir = {sin(yaw) * cos(pitch) , -sin(pitch), -cos(yaw) * cos(pitch)};
-
-    return glm::normalize(dir);
-}
-
-glm::vec3 GetRightUnitVec(float pitch, float yaw) {
-    return glm::normalize(glm::cross(GetDirUnitVec(pitch, yaw), {0.f, 1.f, 0.f})); 
-}
-
-glm::mat4 GetCameraRotationMat(float pitch, float yaw) {
-    return glm::lookAt({0.f, 0.f, 0.f}, GetDirUnitVec(pitch, yaw), {0.f, 1.f, 0.f});
-}
 
 void MoveMouseCallback(int dx, int dy) {
     if(!is_mouse_locked) {
         return;
     }
 
-    camera_pitch = std::clamp(camera_pitch + 1.f * dy * sensitivity, -89.f, 89.f);
-    camera_yaw = camera_yaw + 1.f * dx * sensitivity;
-
-    if(camera_yaw <= 0.f) {
-        camera_yaw += 360.f;
-    } else if(camera_yaw >= 360.f) {
-        camera_yaw -= 360.f;
-    }
+    camera.Rotate(1.f * dy * sensitivity, 1.f * dx * sensitivity);
 } 
 
 void DrawScene(ani::Window* window, ani::Renderer* renderer, ani::Model* teapot) {
@@ -60,12 +36,10 @@ void DrawScene(ani::Window* window, ani::Renderer* renderer, ani::Model* teapot)
     glm::mat4 model(1.f);
     model = glm::rotate(model, glm::radians(coc.getElapsedTime().asSeconds() * kRotationSpeed), glm::vec3{0.f, 1.f, 0.f});
 
-    glm::mat4 view(1.f);
-    view *= GetCameraRotationMat(camera_pitch, camera_yaw);
-    view = glm::translate(view, -camera_pos);
+    glm::mat4 view = camera.GetViewMatrix();
 
     glm::mat4 projection(1.f);
-    projection = glm::perspective(glm::radians(60.f), static_cast<float>(window->GetWidth()) / static_cast<float>(window->GetHeight()), 0.1f, 100.f);
+    projection = glm::perspective(glm::radians(60.f), window->GetWidth() / window->GetHeight(), 0.1f, 100.f);
 
     auto trans = projection * view * model;
 
@@ -76,20 +50,22 @@ void DrawScene(ani::Window* window, ani::Renderer* renderer, ani::Model* teapot)
 
 void Update(ani::Window* window, float dt) {
     if(window->IsKeyPressed(sf::Keyboard::W)) {
-        camera_pos += kMovementSpeed * dt * GetDirUnitVec(camera_pitch, camera_yaw);
-        // camera_pos.z -= kMovementSpeed * dt; 
+        camera.Move(kMovementSpeed * dt * camera.GetDirectionVec());
     } 
     if(window->IsKeyPressed(sf::Keyboard::S)) {
-        camera_pos -= kMovementSpeed * dt * GetDirUnitVec(camera_pitch, camera_yaw);
-        // camera_pos.z += kMovementSpeed * dt; 
+        camera.Move(-kMovementSpeed * dt * camera.GetDirectionVec());
     } 
     if(window->IsKeyPressed(sf::Keyboard::D)) {
-        camera_pos += kMovementSpeed * dt * GetRightUnitVec(camera_pitch, camera_yaw);
-        // camera_pos.x += kMovementSpeed * dt; 
+        camera.Move(kMovementSpeed * dt * camera.GetRightVec());
     } 
     if(window->IsKeyPressed(sf::Keyboard::A)) {
-        camera_pos -= kMovementSpeed * dt * GetRightUnitVec(camera_pitch, camera_yaw);
-        // camera_pos.x -= kMovementSpeed * dt; 
+        camera.Move(-kMovementSpeed * dt * camera.GetRightVec());
+    } 
+    if(window->IsKeyPressed(sf::Keyboard::Space)) {
+        camera.Move(kMovementSpeed * dt * camera.GetUpVec());
+    } 
+    if(window->IsKeyPressed(sf::Keyboard::LShift)) {
+        camera.Move(-kMovementSpeed * dt * camera.GetUpVec());
     } 
 
     static bool released_c = true;

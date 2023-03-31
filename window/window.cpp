@@ -119,7 +119,7 @@ void Window::HandleCursorMoved() {
         if (first_cursor_move_) {
             first_cursor_move_ = false;
         } else {
-            cursor_moved_callback_(cursor_pos.x - window_center.x, cursor_pos.y - window_center.y);
+            cursor_moved_callback_(cursor_pos.x - window_center.x, window_center.y - cursor_pos.y);
         }
 
         sf::Mouse::setPosition(window_center);
@@ -127,7 +127,7 @@ void Window::HandleCursorMoved() {
         auto cursor_pos = sf::Mouse::getPosition();
         static auto prev_cursor_pos = cursor_pos;
 
-        cursor_moved_callback_(cursor_pos.x - prev_cursor_pos.x, cursor_pos.y - prev_cursor_pos.y);
+        cursor_moved_callback_(cursor_pos.x - prev_cursor_pos.x, prev_cursor_pos.y - cursor_pos.y);
 
         prev_cursor_pos = cursor_pos;
     }
