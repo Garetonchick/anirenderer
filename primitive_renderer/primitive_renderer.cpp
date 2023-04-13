@@ -20,6 +20,7 @@
 namespace ani {
 PrimitiveRenderer::PrimitiveRenderer(uint32_t screen_width, uint32_t screen_height)
     : screen_(screen_width, screen_height), depth_buf_(screen_width, screen_height, 1.f) {
+    Clear({0, 255, 0});
 }
 
 void PrimitiveRenderer::Clear(const RGB& color) {

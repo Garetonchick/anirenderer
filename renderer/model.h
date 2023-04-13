@@ -5,7 +5,7 @@ namespace ani {
 
 class Model {
 public:
-    Model(const char* path);
+    Model(const std::string& path);
     const std::vector<Triangle>& GetTriangles() const;
 
 private:

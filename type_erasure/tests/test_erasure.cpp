@@ -10,12 +10,12 @@ public:
 };
 
 template <class T>
-void DrawObject(T obj) {
+void DrawObject(T& obj) {
     std::cout << "I draw: " << obj << std::endl;
 }
 
 template <>
-void DrawObject(Circle obj) {
+void DrawObject(Circle& obj) {
     std::cout << "I draw: ";
     obj.Draw();
     std::cout << std::endl;

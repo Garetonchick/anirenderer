@@ -13,9 +13,13 @@ public:
     float GetPitch() const;
     float GetYaw() const;
     glm::mat4 GetViewMatrix() const;
+    glm::mat4 GetProjMatrix() const;
+    glm::mat4 GetViewProjMatrix() const;
     glm::vec3 GetDirectionVec() const;
     glm::vec3 GetRightVec() const;
     glm::vec3 GetUpVec() const;
+
+    void SetViewFrustrum(float yfov, float width_to_height_ratio, float near, float far);
 
     void Move(const glm::vec3& pos_dlt);
     void Rotate(float pitch_dlt, float yaw_dlt);
@@ -32,6 +36,8 @@ private:
 
     const float min_pitch_;
     const float max_pitch_;
+
+    glm::mat4 proj_;
 };
 
 }  // namespace ani

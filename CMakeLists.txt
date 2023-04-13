@@ -28,6 +28,8 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(SFML)
 
+add_compile_definitions(ANIRENDERER_PATH="${CMAKE_CURRENT_LIST_DIR}")
+
 # Interface library to propogate sfml include directories for other targets
 add_library(sfml-includes INTERFACE)
 target_link_libraries(sfml-includes INTERFACE sfml-graphics)
@@ -38,7 +40,7 @@ target_compile_options(anirenderer PRIVATE ${ANIRENDERER_FLAGS})
 message(STATUS "Anirenderer flags are: ${ANIRENDERER_FLAGS}")
 
 # Link external dependencies to executable
-target_link_libraries(anirenderer PRIVATE sfml-graphics)
+target_link_libraries(anirenderer PRIVATE application sfml-includes)
 
 # Setup clang-tidy 
 set_target_properties(
@@ -47,6 +49,7 @@ set_target_properties(
         CXX_CLANG_TIDY "clang-tidy"
 )
 
+add_subdirectory(application)
 add_subdirectory(window)
 add_subdirectory(utility)
 add_subdirectory(primitive_renderer)

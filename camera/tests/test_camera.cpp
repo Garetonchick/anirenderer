@@ -30,18 +30,15 @@ void MoveMouseCallback(int dx, int dy) {
 } 
 
 void DrawScene(ani::Window* window, ani::Renderer* renderer, ani::Model* teapot) {
-    renderer->SetScreenSize(window->GetWidth(), window->GetHeight());
+    // renderer->SetScreenSize(window->GetWidth(), window->GetHeight());
     renderer->Clear({50, 50, 50});
 
     glm::mat4 model(1.f);
     model = glm::rotate(model, glm::radians(coc.getElapsedTime().asSeconds() * kRotationSpeed), glm::vec3{0.f, 1.f, 0.f});
 
-    glm::mat4 view = camera.GetViewMatrix();
+    camera.SetViewFrustrum(60.f, window->GetWidth() / window->GetHeight(), 0.1f, 100.f);
 
-    glm::mat4 projection(1.f);
-    projection = glm::perspective(glm::radians(60.f), window->GetWidth() / window->GetHeight(), 0.1f, 100.f);
-
-    auto trans = projection * view * model;
+    auto trans = camera.GetViewProjMatrix() * model;
 
     renderer->Render(*teapot, trans);
 
@@ -62,10 +59,10 @@ void Update(ani::Window* window, float dt) {
         camera.Move(-kMovementSpeed * dt * camera.GetRightVec());
     } 
     if(window->IsKeyPressed(sf::Keyboard::Space)) {
-        camera.Move(kMovementSpeed * dt * camera.GetUpVec());
+        camera.Move(kMovementSpeed * dt * glm::vec3{0.f, 1.f, 0.f});
     } 
     if(window->IsKeyPressed(sf::Keyboard::LShift)) {
-        camera.Move(-kMovementSpeed * dt * camera.GetUpVec());
+        camera.Move(-kMovementSpeed * dt * glm::vec3{0.f, 1.f, 0.f});
     } 
 
     static bool released_c = true;
@@ -107,6 +104,7 @@ int main() {
         sf::Time frame_start_time = coc.getElapsedTime();
 
         window.PollEvents();
+        renderer.SetScreenSize(window.GetWidth(), window.GetHeight());
         Update(&window, dt);
         DrawScene(&window, &renderer, &teapot);
         dt = static_cast<float>((coc.getElapsedTime() - frame_start_time).asMilliseconds());

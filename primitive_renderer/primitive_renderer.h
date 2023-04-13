@@ -13,7 +13,7 @@ namespace ani {
 // Expects all coordinates in ndc
 class PrimitiveRenderer {
 public:
-    PrimitiveRenderer(uint32_t screen_width, uint32_t screen_height);
+    explicit PrimitiveRenderer(uint32_t screen_width = 800, uint32_t screen_height = 600);
 
     void Clear(const RGB& color);
     void SetScreenSize(uint32_t screen_width, uint32_t screen_height);

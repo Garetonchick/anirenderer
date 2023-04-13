@@ -1,5 +1,5 @@
 add_library(window STATIC window.cpp)
-target_link_libraries(window PRIVATE sfml-includes utility)
+target_link_libraries(window PRIVATE sfml-includes utility sfml-graphics)
 target_compile_options(window PRIVATE ${ANIRENDERER_DEBUG_FLAGS})
 
 # Test program

@@ -5,7 +5,7 @@
 
 namespace ani {
 
-Model::Model(const char* path) {
+Model::Model(const std::string& path) {
     std::ifstream in(path);
 
     if(!in) {

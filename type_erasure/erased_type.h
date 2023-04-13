@@ -9,7 +9,7 @@ class ErasedType : public Caller<std::shared_ptr<const Interface>> {
 
 public:
     template <class T>
-    ErasedType(T val) : CallerT(std::make_shared<const Implementor<T, Interface>>(val)) {
+    explicit ErasedType(T val) : CallerT(std::make_shared<const Implementor<T, Interface>>(val)) {
     }
 };
 

@@ -47,7 +47,32 @@ void Window::SetSize(uint32_t width, uint32_t height) {
 }
 
 void Window::Display(const Image& image) {
-    texture_.update(image.GetRawRGBA());
+    int w = sf::RenderWindow::getSize().x;
+    int h = sf::RenderWindow::getSize().y;
+
+    if(image.GetWidth() == w && 
+       image.GetHeight() == h) {
+        texture_.update(image.GetRawRGBA());
+    } else {
+        std::vector<unsigned char> rgba(w * h * 4); 
+
+        for(int i = 0; i < w; ++i) {
+            for(int j = 0; j < h; ++j) {
+                int off = 4 * (j * w + i);
+                int x = i * image.GetWidth() / w;
+                int y = j * image.GetHeight() / h;
+                RGB color = image.GetPixel(x, y);
+
+                rgba[off] = color.r; 
+                rgba[off + 1] = color.g; 
+                rgba[off + 2] = color.b; 
+                rgba[off + 3] = 255; 
+            }
+        }
+
+        texture_.update(rgba.data());
+    }
+
     sf::RenderWindow::draw(sprite_);
     sf::RenderWindow::display();
 }
@@ -99,6 +124,10 @@ void Window::SetMouseScrolledCallback(const std::function<void(float)>& callback
     mouse_scrolled_callback_ = callback;
 }
 
+void Window::SetWindowResizedCallback(const std::function<void()>& callback) {
+    window_resized_callback_ = callback;
+}
+
 void Window::Reset() {
     sf::RenderWindow::setView(
         sf::View({GetWidth() / 2.f, GetHeight() / 2.f}, {GetWidth(), GetHeight()}));
@@ -133,9 +162,11 @@ void Window::HandleCursorMoved() {
     }
 }
 
+
 void Window::onResize() {
     Reset();
     Clear();
+    window_resized_callback_();
 }
 
 }  // namespace ani
