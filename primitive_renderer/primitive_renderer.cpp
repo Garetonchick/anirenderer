@@ -33,16 +33,6 @@ void PrimitiveRenderer::SetScreenSize(uint32_t screen_width, uint32_t screen_hei
     depth_buf_.Resize(screen_width, screen_height);
 }
 
-void PrimitiveRenderer::Render(const Point& point) {
-    (void)point;
-    throw std::runtime_error("Not implemented");
-}
-
-void PrimitiveRenderer::Render(const Segment& segment) {
-    (void)segment;
-    throw std::runtime_error("Not implemented");
-}
-
 void PrimitiveRenderer::Render(const Triangle& triangle, const Texture& texture) {
     auto points = ClipTriangle(triangle);
     assert(points.size() != 1 && points.size() != 2);
@@ -107,23 +97,6 @@ void PrimitiveRenderer::TransformPoint(Point* p) {
     p->pos.w = w;
 }
 
-float Q_rsqrt( float number ) // NOLINT
-{
-	long i;
-	float x2, y;
-	const float threehalfs = 1.5F;
-
-	x2 = number * 0.5F;
-	y  = number;
-	i  = * ( long * ) &y;                       // evil floating point bit level hacking NOLINT
-	i  = 0x5f3759df - ( i >> 1 );               // what the fuck? 
-	y  = * ( float * ) &i;                      // NOLINT
-	y  = y * ( threehalfs - ( x2 * y * y ) );   // 1st iteration
-//	y  = y * ( threehalfs - ( x2 * y * y ) );   // 2nd iteration, this can be removed
-
-	return y;
-}
-
 void PrimitiveRenderer::ScanBetweenEdges(EdgeWalk* long_edge, EdgeWalk* short_edge,
                                          bool righthanded, const Texture& texture) {
     int32_t start_y = std::max(0, short_edge->GetBeginY());
@@ -152,7 +125,6 @@ void PrimitiveRenderer::ScanBetweenEdges(EdgeWalk* long_edge, EdgeWalk* short_ed
             for (int32_t x = start_x; x < end_x; ++x, lerp_amount += lerp_step) {
                 float inv_w = Lerp(left_edge->GetCurrentInvW(), right_edge->GetCurrentInvW(), lerp_amount); 
                 float w = 1.0 / inv_w; 
-                // float w = Q_rsqrt(inv_w * inv_w); 
                 float z = Lerp(left_edge->GetCurrentZ(), right_edge->GetCurrentZ(), lerp_amount) * w;
                 if(z < depth_buf_.Get(y, x)) {
                     depth_buf_.Set(y, x, z);
@@ -160,20 +132,11 @@ void PrimitiveRenderer::ScanBetweenEdges(EdgeWalk* long_edge, EdgeWalk* short_ed
                     glm::vec4 color = glm::clamp(Lerp(left_edge->GetCurrentColor(),
                                                     right_edge->GetCurrentColor(), lerp_amount) * w,
                                                 0.f, 1.f);
-                    // glm::vec4 color = glm::clamp(Lerp(left_edge->GetCurrentColor(),
-                    //                                 right_edge->GetCurrentColor(), lerp_amount),
-                    //                             0.f, 1.f);
-                    // glm::vec2 tex_coord = Lerp(left_edge->GetCurrentTexCoord(),
-                    //                         right_edge->GetCurrentTexCoord(), lerp_amount) * w;
-                    // glm::vec4 tex_color = texture.Sample(tex_coord);
-                    // assert(x >= 0 && y >= 0 && x < screen_.GetWidth() && y < screen_.GetHeight());
-                    // screen_.SetPixel(x, y, NormalizedColorToRGB(Mix(tex_color, color)));
-                    // screen_.SetPixel(x, y, NormalizedColorToRGB({0.f, 1.f, 0.f, 1.f}));
-                    // screen_.SetPixel(x, y, NormalizedColorToRGB(RandomColor()));
-                    // screen_.SetPixel(x, y, NormalizedColorToRGB(tex_color));
-                    // screen_.SetPixel(x, y, NormalizedColorToRGB({tex_coord.x, tex_coord.y, 0.f, 1.f}));
-                    screen_.SetPixel(x, y, NormalizedColorToRGB(color));
-                    // screen_.SetPixel(x, y, NormalizedColorToRGB({inv_w, inv_w, inv_w, 1.f}));
+                    glm::vec2 tex_coord = Lerp(left_edge->GetCurrentTexCoord(),
+                                            right_edge->GetCurrentTexCoord(), lerp_amount) * w;
+                    glm::vec4 tex_color = texture.Sample(tex_coord);
+
+                    screen_.SetPixel(x, y, NormalizedColorToRGB(Lerp(color, tex_color, tex_color.w)));
                 }
             }
         }

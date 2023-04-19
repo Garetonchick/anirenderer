@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <vector>
+#include <string>
 
 namespace ani {
 struct RGB {
@@ -19,6 +20,7 @@ glm::vec4 RandomColor();
 class Image {
 public:
     explicit Image(uint32_t width = 0, uint32_t height = 0, const RGB& color = {});
+    Image(const std::string& path);
 
     uint32_t GetWidth() const;
     uint32_t GetHeight() const;

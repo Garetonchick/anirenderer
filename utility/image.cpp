@@ -1,4 +1,9 @@
-#include <utility/image.h>
+#include "image.h"
+#include <stdexcept>
+
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
+
 #include <utility/random.h>
 
 namespace ani { 
@@ -25,6 +30,24 @@ namespace ani {
     Image::Image(uint32_t width, uint32_t height, const RGB& color) : width_(width), height_(height), 
         data_(width_ * height_ * kChannelsNum) {
         Fill(color);
+    }
+
+    Image::Image(const std::string& path) {
+        int width;
+        int height;
+        int channels_num;
+        unsigned char *data = stbi_load(path.c_str(), &width, &height, &channels_num, kChannelsNum);
+
+        if(!data) {
+            throw std::runtime_error("Couldn't load image: " + path + "\n" + stbi_failure_reason());
+        }
+
+        width_ = width;
+        height_ = height;
+        data_.resize(width_ * height_ * kChannelsNum);
+        memcpy(&data_[0], data, data_.size());
+
+        stbi_image_free(data);
     }
 
     uint32_t Image::GetWidth() const {

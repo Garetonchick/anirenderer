@@ -1,6 +1,7 @@
 #include <window/window.h>
 #include <primitive_renderer/primitive_renderer.h>
 
+#include <filesystem>
 #include <iostream>
 #include <random>
 #include <chrono>
@@ -18,24 +19,7 @@ int main() {
 
     sf::Clock clock;
 
-    ani::Image image(512, 512);
-
-    std::mt19937 rnd(4444);
-    std::uniform_int_distribution<uint8_t> dist(0, 255);
-
-    for(int ib = 0; ib < image.GetWidth() / 8; ++ib) {
-        for(int jb = 0; jb < image.GetHeight() / 8; ++jb) {
-            ani::RGB color = {dist(rnd), dist(rnd), dist(rnd)}; 
-            for(int i = 0; i < 8; ++i) {
-                for(int j = 0; j < 8; ++j) {
-                    image.SetPixel(ib * 8 + i, jb * 8 + j, color);
-                }
-            }
-        }
-    }
-
-    ani::Texture texture(image);
-
+    ani::Texture texture(std::filesystem::path(ANIRENDERER_PATH) / "assets/teapot/dirt.jpg");
     ani::PrimitiveRenderer renderer(window.GetWidth(), window.GetHeight());
 
     glm::vec4 p1 = {-0.5f, -0.5f, 0.f, 1.f};

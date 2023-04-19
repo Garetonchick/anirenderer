@@ -7,13 +7,16 @@ namespace ani {
 Texture::Texture(const Image& image) : image_(image) {
 }
 
+Texture::Texture(const std::string& path) : image_(path) {
+}
+
 glm::vec4 Texture::Sample(glm::vec2 tex_coords) const {
     return Sample(tex_coords.x, tex_coords.y);
 }
 
 glm::vec4 Texture::Sample(float x, float y) const {
     if(!image_.GetHeight()) {
-        return {1.f, 1.f, 1.f, 1.f};
+        return {1.f, 1.f, 1.f, 0.f};
     }
 
     auto to_pixel_coord = [](float x, int32_t pixels_cnt) {

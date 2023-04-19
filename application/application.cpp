@@ -17,10 +17,24 @@ Application::Application() : window_(800, 600), renderer_(800, 600) {
         this->WindowResizedCallback();
     });
 
-    models_.emplace_back(Model(FullPath("assets/teapot/teapot.obj")), glm::translate(glm::mat4(1.f), {0.f, -1.6f, -6.2f}));
-    models_.emplace_back(Model(FullPath("assets/teapot/teapot.obj")), glm::translate(glm::mat4(1.f), {-8.f, -1.6f, -6.2f}));
-    models_.emplace_back(Model(FullPath("assets/teapot/teapot.obj")), glm::translate(glm::mat4(1.f), {8.f, -1.6f, -6.2f}));
-    models_.emplace_back(Model(FullPath("assets/teapot/teapot.obj")), glm::translate(glm::mat4(1.f), {16.f, -1.6f, -6.2f}));
+    models_.emplace_back(
+        Model(
+            FullPath("assets/teapot/teapot.obj"), 
+            Texture(FullPath("assets/teapot/sand.jpeg"))
+        ), 
+        glm::translate(glm::mat4(1.f), {0.f, -1.6f, -6.2f})
+    );
+
+    // models_.emplace_back(
+    //     Model(
+    //         FullPath("assets/iron-man/IronMan.obj"), 
+    //         Texture(FullPath("assets/teapot/dirt.jpg"))
+    //     ), 
+    //     glm::scale(glm::translate(glm::mat4(1.f), {-8.f, -1.6f, -6.2f}), glm::vec3{0.1f})
+    // );
+
+    // models_.emplace_back(Model(FullPath("assets/teapot/teapot.obj")), glm::translate(glm::mat4(1.f), {8.f, -1.6f, -6.2f}));
+    // models_.emplace_back(Model(FullPath("assets/teapot/teapot.obj")), glm::translate(glm::mat4(1.f), {16.f, -1.6f, -6.2f}));
 }
 
 void Application::Run() {
@@ -38,24 +52,26 @@ void Application::Run() {
 }
 
 void Application::UpdateScene(float dt) {
-    if(window_.IsKeyPressed(sf::Keyboard::W)) {
-        camera_.Move(kMovementSpeed * dt * camera_.GetDirectionVec());
-    } 
-    if(window_.IsKeyPressed(sf::Keyboard::S)) {
-        camera_.Move(-kMovementSpeed * dt * camera_.GetDirectionVec());
-    } 
-    if(window_.IsKeyPressed(sf::Keyboard::D)) {
-        camera_.Move(kMovementSpeed * dt * camera_.GetRightVec());
-    } 
-    if(window_.IsKeyPressed(sf::Keyboard::A)) {
-        camera_.Move(-kMovementSpeed * dt * camera_.GetRightVec());
-    } 
-    if(window_.IsKeyPressed(sf::Keyboard::Space)) {
-        camera_.Move(kMovementSpeed * dt * glm::vec3{0.f, 1.f, 0.f});
-    } 
-    if(window_.IsKeyPressed(sf::Keyboard::LShift)) {
-        camera_.Move(-kMovementSpeed * dt * glm::vec3{0.f, 1.f, 0.f});
-    } 
+    if(window_.GetCursorState() == CursorState::LOCKED_INSIDE) {
+        if(window_.IsKeyPressed(sf::Keyboard::W)) {
+            camera_.Move(kMovementSpeed * dt * camera_.GetDirectionVec());
+        } 
+        if(window_.IsKeyPressed(sf::Keyboard::S)) {
+            camera_.Move(-kMovementSpeed * dt * camera_.GetDirectionVec());
+        } 
+        if(window_.IsKeyPressed(sf::Keyboard::D)) {
+            camera_.Move(kMovementSpeed * dt * camera_.GetRightVec());
+        } 
+        if(window_.IsKeyPressed(sf::Keyboard::A)) {
+            camera_.Move(-kMovementSpeed * dt * camera_.GetRightVec());
+        } 
+        if(window_.IsKeyPressed(sf::Keyboard::Space)) {
+            camera_.Move(kMovementSpeed * dt * glm::vec3{0.f, 1.f, 0.f});
+        } 
+        if(window_.IsKeyPressed(sf::Keyboard::LShift)) {
+            camera_.Move(-kMovementSpeed * dt * glm::vec3{0.f, 1.f, 0.f});
+        } 
+    }
 
     static bool released_c = true;
 
