@@ -19,6 +19,9 @@ public:
     void Run();
 
 private:
+    void SetupScene();
+    void AddObjects();
+    void AddLights();
     void UpdateScene(float dt);
     void DrawScene();
 
@@ -38,7 +41,8 @@ private:
     ani::Camera camera_;
     sf::Clock clock_;
 
-    std::vector<std::pair<ani::Model, glm::mat4>> models_;
+    std::vector<std::pair<Model, glm::mat4>> models_;
+    std::vector<std::pair<Lamp, glm::mat4>> lamps_;
 };
 
 }

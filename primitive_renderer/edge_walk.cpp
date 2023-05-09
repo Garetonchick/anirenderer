@@ -5,7 +5,7 @@
 namespace ani {
 
 EdgeWalk::EdgeWalk(Point top, Point bottom, const Gradients& gradients)
-    : gradients_(gradients) {
+    : gradients_(gradients), normal_(top.normal) {
     begin_int_y_ = std::ceil(top.pos.y);
     end_int_y_ = std::ceil(bottom.pos.y);
 
@@ -27,6 +27,11 @@ EdgeWalk::EdgeWalk(Point top, Point bottom, const Gradients& gradients)
                      x_prestep * gradients.GetXTexCoordSlope() + 
                      y_prestep * gradients.GetYTexCoordSlope();
     tex_coord_step_ =  x_step_ * gradients.GetXTexCoordSlope() + gradients.GetYTexCoordSlope();
+
+    cur_world_pos_ = top.world_pos * top_inv_w + 
+                     x_prestep * gradients.GetXWorldPosSlope() +
+                     y_prestep * gradients.GetYWorldPosSlope();
+    world_pos_step_ = x_step_ * gradients.GetXWorldPosSlope() + gradients.GetYWorldPosSlope();
 
     cur_inv_w_ = top_inv_w + 
                  x_prestep * gradients.GetXInvWSlope() +
@@ -58,8 +63,16 @@ glm::vec4 EdgeWalk::GetCurrentColor() const {
     return cur_color_ + cur_x_prestep_ * gradients_.GetXColorSlope(); 
 }
 
+glm::vec3 EdgeWalk::GetNormal() const {
+    return normal_;
+}
+
 glm::vec2 EdgeWalk::GetCurrentTexCoord() const {
     return cur_tex_coord_ + cur_x_prestep_ * gradients_.GetXTexCoordSlope(); 
+}
+
+glm::vec4 EdgeWalk::GetCurrentWorldPos() const {
+    return cur_world_pos_ + cur_x_prestep_ * gradients_.GetXWorldPosSlope(); 
 }
 
 float EdgeWalk::GetCurrentInvW() const {
@@ -82,6 +95,7 @@ void EdgeWalk::UpdateAfterStep() {
     cur_tex_coord_ += tex_coord_step_;
     cur_inv_w_ += inv_w_step_;
     cur_z_ += z_step_;
+    cur_world_pos_ += world_pos_step_;
 }
 
 }  // namespace ani

@@ -12,14 +12,60 @@
 #include <algorithm>
 #include <cmath>
 #include <iostream>
+#include "primitive_renderer/lights.h"
+#include "primitive_renderer/texture.h"
 #include "utility/image.h"
 #include "utility/math.h"
 
 // #define FACE_CULLING
 
 namespace ani {
+
+glm::vec4 StandartShader(const ani::Texture& texture, 
+                         float w, float lerp_amount, const ani::EdgeWalk& left_edge, 
+                         const ani::EdgeWalk& right_edge, 
+                         const glm::vec3& view_pos,
+                         const std::vector<ani::PointLight>& point_lights) {
+    glm::vec4 color = glm::clamp(Lerp(left_edge.GetCurrentColor(),
+                                    right_edge.GetCurrentColor(), lerp_amount) * w,
+                                0.f, 1.f);
+    glm::vec2 tex_coord = Lerp(left_edge.GetCurrentTexCoord(),
+                            right_edge.GetCurrentTexCoord(), lerp_amount) * w;
+    glm::vec4 tex_color = texture.Sample(tex_coord);
+    glm::vec4 world_pos = Lerp(left_edge.GetCurrentWorldPos(),
+                                right_edge.GetCurrentWorldPos(), lerp_amount) * w;
+
+    glm::vec4 frag_color = Lerp(color, tex_color, tex_color.w);
+    glm::vec3 light_color(0.f);
+
+    for(auto& light : point_lights) {
+        light_color += CalculateLightValue(light, left_edge.GetNormal(), world_pos, view_pos);
+    }
+
+    return glm::clamp(frag_color * glm::vec4(light_color, 1.f), 0.f, 1.f); 
+}
+
+glm::vec4 LightlessShader(const ani::Texture& texture, 
+                         float w, float lerp_amount, const ani::EdgeWalk& left_edge, 
+                         const ani::EdgeWalk& right_edge, 
+                         const glm::vec3& view_pos,
+                         const std::vector<ani::PointLight>& point_lights) {
+    glm::vec4 color = glm::clamp(Lerp(left_edge.GetCurrentColor(),
+                                    right_edge.GetCurrentColor(), lerp_amount) * w,
+                                0.f, 1.f);
+    glm::vec2 tex_coord = Lerp(left_edge.GetCurrentTexCoord(),
+                            right_edge.GetCurrentTexCoord(), lerp_amount) * w;
+    glm::vec4 tex_color = texture.Sample(tex_coord);
+    glm::vec4 world_pos = Lerp(left_edge.GetCurrentWorldPos(),
+                                right_edge.GetCurrentWorldPos(), lerp_amount) * w;
+
+    glm::vec4 frag_color = Lerp(color, tex_color, tex_color.w);
+
+    return frag_color;
+}
+
 PrimitiveRenderer::PrimitiveRenderer(uint32_t screen_width, uint32_t screen_height)
-    : screen_(screen_width, screen_height), depth_buf_(screen_width, screen_height, 1.f) {
+    : screen_(screen_width, screen_height), depth_buf_(screen_width, screen_height, 1.f), view_pos_(0.f) {
     Clear({0, 255, 0});
 }
 
@@ -33,7 +79,15 @@ void PrimitiveRenderer::SetScreenSize(uint32_t screen_width, uint32_t screen_hei
     depth_buf_.Resize(screen_width, screen_height);
 }
 
-void PrimitiveRenderer::Render(const Triangle& triangle, const Texture& texture) {
+void PrimitiveRenderer::SetViewPos(const glm::vec3& view_pos) {
+    view_pos_ = view_pos;
+}
+
+void PrimitiveRenderer::AddPointLight(const PointLight& light) {
+    point_lights_.push_back(light);
+}
+
+void PrimitiveRenderer::Render(const Triangle& triangle, const Texture& texture, FragmentShader fragment_shader) {
     auto points = ClipTriangle(triangle);
     assert(points.size() != 1 && points.size() != 2);
 
@@ -41,7 +95,7 @@ void PrimitiveRenderer::Render(const Triangle& triangle, const Texture& texture)
         Point p0_copy = points[0];
         Point pi_copy = points[i];
         Point p_i_next_copy = points[i + 1];
-        RenderTriangle(&p0_copy, &pi_copy, &p_i_next_copy, texture);
+        RenderTriangle(&p0_copy, &pi_copy, &p_i_next_copy, texture, fragment_shader);
     }
 }
 
@@ -49,7 +103,7 @@ const Image& PrimitiveRenderer::GetRendered() const {
     return screen_;
 }
 
-void PrimitiveRenderer::RenderTriangle(Point* p1, Point* p2, Point* p3, const Texture& texture) {
+void PrimitiveRenderer::RenderTriangle(Point* p1, Point* p2, Point* p3, const Texture& texture, FragmentShader fragment_shader) {
     Point* points[] = {p1, p2, p3};
 
     TransformPoint(points[0]);
@@ -62,6 +116,11 @@ void PrimitiveRenderer::RenderTriangle(Point* p1, Point* p2, Point* p3, const Te
     Point& min_y_point = *points[0];
     Point& mid_y_point = *points[1];
     Point& max_y_point = *points[2];
+
+    // std::cout << "Triangle" << std::endl;
+    // std::cout << p1->tex_coords << std::endl;
+    // std::cout << p2->tex_coords << std::endl;
+    // std::cout << p3->tex_coords << std::endl;
 
     Gradients gradients(*p1, *p2, *p3);
 
@@ -85,8 +144,8 @@ void PrimitiveRenderer::RenderTriangle(Point* p1, Point* p2, Point* p3, const Te
         return;
     }
 #endif
-    ScanBetweenEdges(&long_edge, &short_top_edge, righthanded, texture);
-    ScanBetweenEdges(&long_edge, &short_bottom_edge, righthanded, texture);
+    ScanBetweenEdges(&long_edge, &short_top_edge, righthanded, texture, fragment_shader);
+    ScanBetweenEdges(&long_edge, &short_bottom_edge, righthanded, texture, fragment_shader);
 }
 
 void PrimitiveRenderer::TransformPoint(Point* p) {
@@ -98,7 +157,7 @@ void PrimitiveRenderer::TransformPoint(Point* p) {
 }
 
 void PrimitiveRenderer::ScanBetweenEdges(EdgeWalk* long_edge, EdgeWalk* short_edge,
-                                         bool righthanded, const Texture& texture) {
+                                         bool righthanded, const Texture& texture, FragmentShader fragment_shader) {
     int32_t start_y = std::max(0, short_edge->GetBeginY());
     int32_t end_y = std::min<int32_t>(short_edge->GetEndY(), screen_.GetHeight() - 1);
     EdgeWalk* left_edge = long_edge;
@@ -128,15 +187,15 @@ void PrimitiveRenderer::ScanBetweenEdges(EdgeWalk* long_edge, EdgeWalk* short_ed
                 float z = Lerp(left_edge->GetCurrentZ(), right_edge->GetCurrentZ(), lerp_amount) * w;
                 if(z < depth_buf_.Get(y, x)) {
                     depth_buf_.Set(y, x, z);
-
-                    glm::vec4 color = glm::clamp(Lerp(left_edge->GetCurrentColor(),
-                                                    right_edge->GetCurrentColor(), lerp_amount) * w,
-                                                0.f, 1.f);
-                    glm::vec2 tex_coord = Lerp(left_edge->GetCurrentTexCoord(),
-                                            right_edge->GetCurrentTexCoord(), lerp_amount) * w;
-                    glm::vec4 tex_color = texture.Sample(tex_coord);
-
-                    screen_.SetPixel(x, y, NormalizedColorToRGB(Lerp(color, tex_color, tex_color.w)));
+                    screen_.SetPixel(x, y, NormalizedColorToRGB(
+                            fragment_shader(
+                                texture, w, lerp_amount, 
+                                *left_edge, *right_edge, 
+                                view_pos_, point_lights_
+                            )
+                        )
+                    );
+                    // screen_.SetPixel(x, y, NormalizedColorToRGB(glm::vec4((left_edge->GetNormal() + 1.f) * 0.5f, 1.f)));
                 }
             }
         }

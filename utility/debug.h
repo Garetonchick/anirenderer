@@ -7,3 +7,9 @@ inline std::ostream& operator<<(std::ostream& o, const glm::vec4& v) {
 
     return o;
 }
+
+inline std::ostream& operator<<(std::ostream& o, const glm::vec2& v) {
+    o << v.x << " " << v.y;
+
+    return o;
+}

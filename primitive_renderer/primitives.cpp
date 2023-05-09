@@ -9,6 +9,8 @@ Point Point::Lerp(const Point& o, float lerp_amount) const {
     p.pos = ani::Lerp(pos, o.pos, lerp_amount);
     p.color = ani::Lerp(color, o.color, lerp_amount);
     p.tex_coords = ani::Lerp(tex_coords, o.tex_coords, lerp_amount);
+    p.normal = ani::Lerp(normal, o.normal, lerp_amount);
+    p.world_pos = ani::Lerp(world_pos, o.world_pos, lerp_amount);
 
     return p;
 }
@@ -19,10 +21,21 @@ Triangle::Triangle(const Point& a, const Point& b, const Point& c) {
     points_[2] = c;
 }
 
-void Triangle::Transform(const glm::mat4& trans) {
-    points_[0].pos = trans * points_[0].pos;
-    points_[1].pos = trans * points_[1].pos;
-    points_[2].pos = trans * points_[2].pos;
+void Triangle::Transform(const glm::mat4& view_trans,
+                         const glm::mat4& proj_trans, 
+                         const glm::mat4& model_trans,
+                         const glm::mat4& scale_trans) {
+    glm::mat4 full_trans = proj_trans * view_trans * model_trans * scale_trans;
+    glm::mat3 normal_trans = glm::mat3(model_trans); 
+    points_[0].world_pos = model_trans * points_[0].pos;
+    points_[1].world_pos = model_trans * points_[1].pos;
+    points_[2].world_pos = model_trans * points_[2].pos;
+    points_[0].pos = full_trans * points_[0].pos;
+    points_[1].pos = full_trans * points_[1].pos;
+    points_[2].pos = full_trans * points_[2].pos;
+    points_[0].normal = normal_trans * points_[0].normal;
+    points_[1].normal = normal_trans * points_[1].normal;
+    points_[2].normal = normal_trans * points_[2].normal;
 }
 
 Point& Triangle::GetPointA() {

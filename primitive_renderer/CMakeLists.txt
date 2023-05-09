@@ -4,6 +4,7 @@ add_library(primitive_renderer STATIC
     edge_walk.cpp 
     gradients.cpp 
     texture.cpp
+    lights.cpp
 )
 target_link_libraries(primitive_renderer PRIVATE utility)
 target_compile_options(primitive_renderer PRIVATE ${ANIRENDERER_DEBUG_FLAGS})

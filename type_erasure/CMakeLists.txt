@@ -1,1 +1,0 @@
-add_executable(test_erasure "tests/test_erasure.cpp")

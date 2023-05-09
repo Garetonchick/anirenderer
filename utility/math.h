@@ -4,6 +4,21 @@
 
 namespace ani {
 
+template<typename T>
+T Bpow(T val, int32_t power) {
+    if(!power) {
+        return T(1);
+    }
+
+    T tmp = Bpow(val, power >> 1);
+
+    if(power & 1) {
+        return tmp * tmp * val; 
+    }
+
+    return tmp * tmp;
+}
+
 template<class T>
 T Lerp(const T& val1, const T& val2, float lerp_amount) {
     return val1 + (val2 - val1) * lerp_amount;

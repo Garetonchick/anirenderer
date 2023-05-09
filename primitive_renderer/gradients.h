@@ -5,12 +5,14 @@ namespace ani {
 
 class Gradients {
 public:
-    explicit Gradients(const Point& a, const Point& b, const Point& c);
+    Gradients(const Point& a, const Point& b, const Point& c);
 
     const glm::vec4& GetXColorSlope() const;
     const glm::vec4& GetYColorSlope() const;
     const glm::vec2& GetXTexCoordSlope() const;
     const glm::vec2& GetYTexCoordSlope() const;
+    const glm::vec4& GetXWorldPosSlope() const;
+    const glm::vec4& GetYWorldPosSlope() const;
     float GetXInvWSlope() const;
     float GetYInvWSlope() const;
     float GetXZSlope() const;
@@ -21,6 +23,8 @@ private:
     glm::vec4 y_color_slope_;
     glm::vec2 x_tex_coord_slope_;
     glm::vec2 y_tex_coord_slope_;
+    glm::vec4 x_world_pos_slope_;
+    glm::vec4 y_world_pos_slope_;
     float x_inv_w_slope_;
     float y_inv_w_slope_;
     float x_z_slope_;

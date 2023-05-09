@@ -3,6 +3,7 @@
 #include <window/window.h>
 
 #include <filesystem>
+#include "glm/ext/matrix_transform.hpp"
 
 namespace ani {
 
@@ -17,24 +18,7 @@ Application::Application() : window_(800, 600), renderer_(800, 600) {
         this->WindowResizedCallback();
     });
 
-    models_.emplace_back(
-        Model(
-            FullPath("assets/teapot/teapot.obj"), 
-            Texture(FullPath("assets/teapot/sand.jpeg"))
-        ), 
-        glm::translate(glm::mat4(1.f), {0.f, -1.6f, -6.2f})
-    );
-
-    // models_.emplace_back(
-    //     Model(
-    //         FullPath("assets/iron-man/IronMan.obj"), 
-    //         Texture(FullPath("assets/teapot/dirt.jpg"))
-    //     ), 
-    //     glm::scale(glm::translate(glm::mat4(1.f), {-8.f, -1.6f, -6.2f}), glm::vec3{0.1f})
-    // );
-
-    // models_.emplace_back(Model(FullPath("assets/teapot/teapot.obj")), glm::translate(glm::mat4(1.f), {8.f, -1.6f, -6.2f}));
-    // models_.emplace_back(Model(FullPath("assets/teapot/teapot.obj")), glm::translate(glm::mat4(1.f), {16.f, -1.6f, -6.2f}));
+    SetupScene();
 }
 
 void Application::Run() {
@@ -48,6 +32,67 @@ void Application::Run() {
         window_.PollEvents();
 
         dt = GetFrameTime(frame_start_time); 
+    }
+}
+
+void Application::SetupScene() {
+    AddObjects();
+    AddLights();
+}
+
+void Application::AddObjects() {
+    lamps_.emplace_back(
+        Lamp{.model = Model(
+            FullPath("assets/cube/cube.obj"), 
+            {1.f, 1.f, 1.f, 1.f}, 
+            glm::scale(glm::mat4(1.f), glm::vec3(0.4f)))
+        },
+        glm::mat4(1.f)        
+    );
+
+    // models_.emplace_back(
+    //     Model(
+    //         FullPath("assets/teapot/teapot.obj"), 
+    //         Texture(FullPath("assets/teapot/sand.jpeg"))
+    //     ), 
+    //     glm::translate(glm::mat4(1.f), {0.f, -1.6f, -6.2f}) //*
+    //     // glm::rotate(glm::mat4(1.f), glm::radians(180.f), glm::vec3(1.f, 0.f, 0.f))
+    // );
+
+    // models_.emplace_back(
+    //     Model(
+    //         FullPath("assets/cube/cube.obj"), 
+    //         Texture(FullPath("assets/textures/dirt.jpg"))
+    //     ), 
+    //     glm::translate(glm::mat4(1.f), {0.f, -1.6f, -6.2f}) //*
+    //     // glm::rotate(glm::mat4(1.f), glm::radians(180.f), glm::vec3(1.f, 0.f, 0.f))
+    // );
+
+    models_.emplace_back(
+        Model(
+            FullPath("assets/backpack/backpack.obj"), 
+            Texture(FullPath("assets/textures/backpack.jpg"))
+        ), 
+        glm::translate(glm::mat4(1.f), {0.f, -1.6f, -6.2f})
+    );
+
+
+    // models_.emplace_back(
+    //     Model(
+    //         FullPath("assets/iron-man/IronMan.obj"), 
+    //         Texture(FullPath("assets/teapot/dirt.jpg"))
+    //     ), 
+    //     glm::scale(glm::translate(glm::mat4(1.f), {-8.f, -1.6f, -6.2f}), glm::vec3{0.1f})
+    // );
+
+    // models_.emplace_back(Model(FullPath("assets/teapot/teapot.obj")), glm::translate(glm::mat4(1.f), {8.f, -1.6f, -6.2f}));
+    // models_.emplace_back(Model(FullPath("assets/teapot/teapot.obj")), glm::translate(glm::mat4(1.f), {16.f, -1.6f, -6.2f}));
+
+}
+
+void Application::AddLights() {
+    for(auto& [lamp, _] : lamps_) {
+        renderer_.AddPointLight(lamp.light);
     }
 }
 
@@ -98,7 +143,11 @@ void Application::DrawScene() {
     renderer_.Clear({50, 50, 50});
 
     for(auto& [model, trans] : models_) {
-        renderer_.Render(model, camera_.GetViewProjMatrix() * trans);
+        renderer_.Render(model, StandartShader, camera_.GetPos(), camera_.GetViewMatrix(), camera_.GetProjMatrix(), trans);
+    }
+
+    for(auto& [lamp, trans] : lamps_) {
+        renderer_.Render(lamp.model, LightlessShader, camera_.GetPos(), camera_.GetViewMatrix(), camera_.GetProjMatrix(), trans);
     }
 
     window_.Display(renderer_.GetRendered());
