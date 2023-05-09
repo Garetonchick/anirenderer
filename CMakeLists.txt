@@ -6,14 +6,18 @@ set(CMAKE_CXX_STANDARD 20)
 # Export compile commands for clangd
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# Flags for debug
-list(APPEND ANIRENDERER_FLAGS
-    -O3
-    -std=c++20
-    -Wall
-    -Wextra
-    -Werror
-)
+list(APPEND ANIRENDERER_FLAGS)
+
+# Flags 
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    list(APPEND ANIRENDERER_FLAGS
+        -O3
+        -std=c++20
+        -Wall
+        -Wextra
+        -Werror
+    )
+endif()
 
 # Add roots of includes
 include_directories(${CMAKE_CURRENT_LIST_DIR})
@@ -55,5 +59,3 @@ add_subdirectory(utility)
 add_subdirectory(primitive_renderer)
 add_subdirectory(renderer)
 add_subdirectory(camera)
-add_subdirectory(type_erasure)
-add_subdirectory(examples)

@@ -40,7 +40,7 @@ private:
     void Reset();
     void HandleCursorMoved();
 
-    void onResize() override; // NOLINT
+    void onResize() override;  // NOLINT
 
 private:
     static const uint32_t kColorChannelsNum = 4;
@@ -51,9 +51,9 @@ private:
     CursorState cursor_state_ = CursorState::NORMAL;
     bool first_cursor_move_ = true;
 
-    std::function<void(int, int)> cursor_moved_callback_ = [](int, int){};
-    std::function<void(float)> mouse_scrolled_callback_ = [](float){};
-    std::function<void()> window_resized_callback_ = [](){};
+    std::function<void(int, int)> cursor_moved_callback_ = [](int, int) {};
+    std::function<void(float)> mouse_scrolled_callback_ = [](float) {};
+    std::function<void()> window_resized_callback_ = []() {};
 };
 
 }  // namespace ani

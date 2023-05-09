@@ -27,6 +27,7 @@ void Triangle::Transform(const glm::mat4& view_trans,
                          const glm::mat4& scale_trans) {
     glm::mat4 full_trans = proj_trans * view_trans * model_trans * scale_trans;
     glm::mat3 normal_trans = glm::mat3(model_trans); 
+
     points_[0].world_pos = model_trans * points_[0].pos;
     points_[1].world_pos = model_trans * points_[1].pos;
     points_[2].world_pos = model_trans * points_[2].pos;
@@ -51,10 +52,7 @@ Point& Triangle::GetPointC() {
 }
 
 Point& Triangle::GetPoint(int32_t idx) {
-    if(idx < 0 || idx >= 3) {
-        throw std::domain_error("Triangle::GetPoint: Index out of bounds");
-    }
-
+    assert(idx >= 0 && idx < 3);
     return points_[idx];
 }
 
@@ -71,10 +69,7 @@ const Point& Triangle::GetPointC() const {
 }
 
 const Point& Triangle::GetPoint(int32_t idx) const {
-    if(idx < 0 || idx >= 3) {
-        throw std::domain_error("Triangle::GetPoint: Index out of bounds");
-    }
-
+    assert(idx >= 0 && idx < 3);
     return points_[idx];
 }
 

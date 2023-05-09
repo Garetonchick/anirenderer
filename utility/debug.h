@@ -1,15 +1,14 @@
 #pragma once
-#include <glm/vec4.hpp>
 #include <iostream>
 
-inline std::ostream& operator<<(std::ostream& o, const glm::vec4& v) {
-    o << v.x << " " << v.y << " " << v.z << " " << v.w;
+#include <glm/vec4.hpp>
+#include <glm/detail/qualifier.hpp>
 
-    return o;
-}
-
-inline std::ostream& operator<<(std::ostream& o, const glm::vec2& v) {
-    o << v.x << " " << v.y;
+template <int length>
+inline std::ostream& operator<<(std::ostream& o, const glm::vec<length, float, glm::defaultp>& v) {
+    for (int i = 0; i < length; ++i) {
+        o << v[i] << " ";
+    }
 
     return o;
 }

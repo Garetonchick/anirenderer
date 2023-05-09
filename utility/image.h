@@ -30,9 +30,9 @@ public:
     void SetPixel(uint32_t x, uint32_t y, const RGB& color);
     void SetSize(uint32_t width, uint32_t height, const RGB& color = {});
     void Fill(const RGB& color);
-    
+
 private:
-    static const uint32_t kChannelsNum = 4;
+    static constexpr uint32_t kChannelsNum = 4;
 
     uint32_t width_;
     uint32_t height_;

@@ -21,43 +21,39 @@
 
 namespace ani {
 
-glm::vec4 StandartShader(const ani::Texture& texture, 
-                         float w, float lerp_amount, const ani::EdgeWalk& left_edge, 
-                         const ani::EdgeWalk& right_edge, 
+glm::vec4 StandartShader(const ani::Texture& texture, float w, float lerp_amount,
+                         const ani::EdgeWalk& left_edge, const ani::EdgeWalk& right_edge,
                          const glm::vec3& view_pos,
                          const std::vector<ani::PointLight>& point_lights) {
-    glm::vec4 color = glm::clamp(Lerp(left_edge.GetCurrentColor(),
-                                    right_edge.GetCurrentColor(), lerp_amount) * w,
-                                0.f, 1.f);
-    glm::vec2 tex_coord = Lerp(left_edge.GetCurrentTexCoord(),
-                            right_edge.GetCurrentTexCoord(), lerp_amount) * w;
+    glm::vec4 color = glm::clamp(
+        Lerp(left_edge.GetCurrentColor(), right_edge.GetCurrentColor(), lerp_amount) * w, 0.f, 1.f);
+    glm::vec2 tex_coord =
+        Lerp(left_edge.GetCurrentTexCoord(), right_edge.GetCurrentTexCoord(), lerp_amount) * w;
     glm::vec4 tex_color = texture.Sample(tex_coord);
-    glm::vec4 world_pos = Lerp(left_edge.GetCurrentWorldPos(),
-                                right_edge.GetCurrentWorldPos(), lerp_amount) * w;
+    glm::vec4 world_pos =
+        Lerp(left_edge.GetCurrentWorldPos(), right_edge.GetCurrentWorldPos(), lerp_amount) * w;
 
     glm::vec4 frag_color = Lerp(color, tex_color, tex_color.w);
     glm::vec3 light_color(0.f);
 
-    for(auto& light : point_lights) {
+    for (auto& light : point_lights) {
         light_color += CalculateLightValue(light, left_edge.GetNormal(), world_pos, view_pos);
     }
 
-    return glm::clamp(frag_color * glm::vec4(light_color, 1.f), 0.f, 1.f); 
+    return glm::clamp(frag_color * glm::vec4(light_color, 1.f), 0.f, 1.f);
 }
 
-glm::vec4 LightlessShader(const ani::Texture& texture, 
-                         float w, float lerp_amount, const ani::EdgeWalk& left_edge, 
-                         const ani::EdgeWalk& right_edge, 
-                         const glm::vec3& view_pos,
-                         const std::vector<ani::PointLight>& point_lights) {
-    glm::vec4 color = glm::clamp(Lerp(left_edge.GetCurrentColor(),
-                                    right_edge.GetCurrentColor(), lerp_amount) * w,
-                                0.f, 1.f);
-    glm::vec2 tex_coord = Lerp(left_edge.GetCurrentTexCoord(),
-                            right_edge.GetCurrentTexCoord(), lerp_amount) * w;
+glm::vec4 LightlessShader(const ani::Texture& texture, float w, float lerp_amount,
+                          const ani::EdgeWalk& left_edge, const ani::EdgeWalk& right_edge,
+                          const glm::vec3& view_pos,
+                          const std::vector<ani::PointLight>& point_lights) {
+    glm::vec4 color = glm::clamp(
+        Lerp(left_edge.GetCurrentColor(), right_edge.GetCurrentColor(), lerp_amount) * w, 0.f, 1.f);
+    glm::vec2 tex_coord =
+        Lerp(left_edge.GetCurrentTexCoord(), right_edge.GetCurrentTexCoord(), lerp_amount) * w;
     glm::vec4 tex_color = texture.Sample(tex_coord);
-    glm::vec4 world_pos = Lerp(left_edge.GetCurrentWorldPos(),
-                                right_edge.GetCurrentWorldPos(), lerp_amount) * w;
+    glm::vec4 world_pos =
+        Lerp(left_edge.GetCurrentWorldPos(), right_edge.GetCurrentWorldPos(), lerp_amount) * w;
 
     glm::vec4 frag_color = Lerp(color, tex_color, tex_color.w);
 
@@ -65,7 +61,9 @@ glm::vec4 LightlessShader(const ani::Texture& texture,
 }
 
 PrimitiveRenderer::PrimitiveRenderer(uint32_t screen_width, uint32_t screen_height)
-    : screen_(screen_width, screen_height), depth_buf_(screen_width, screen_height, 1.f), view_pos_(0.f) {
+    : screen_(screen_width, screen_height),
+      depth_buf_(screen_width, screen_height, 1.f),
+      view_pos_(0.f) {
     Clear({0, 255, 0});
 }
 
@@ -83,32 +81,47 @@ void PrimitiveRenderer::SetViewPos(const glm::vec3& view_pos) {
     view_pos_ = view_pos;
 }
 
+void PrimitiveRenderer::SetFaceCulling(bool enable) {
+    face_culling_enabled_ = enable;
+}
+
 void PrimitiveRenderer::AddPointLight(const PointLight& light) {
     point_lights_.push_back(light);
 }
 
-void PrimitiveRenderer::Render(const Triangle& triangle, const Texture& texture, FragmentShader fragment_shader) {
-    auto points = ClipTriangle(triangle);
-    assert(points.size() != 1 && points.size() != 2);
-
-    for(int i = 1; i + 1 < points.size(); ++i) {
-        Point p0_copy = points[0];
-        Point pi_copy = points[i];
-        Point p_i_next_copy = points[i + 1];
-        RenderTriangle(&p0_copy, &pi_copy, &p_i_next_copy, texture, fragment_shader);
-    }
+void PrimitiveRenderer::Render(const Triangle& triangle, const Texture& texture,
+                               FragmentShader fragment_shader) {
+    RenderClippedTriangles(ClipTriangle(triangle), texture, fragment_shader);
 }
 
 const Image& PrimitiveRenderer::GetRendered() const {
     return screen_;
 }
 
-void PrimitiveRenderer::RenderTriangle(Point* p1, Point* p2, Point* p3, const Texture& texture, FragmentShader fragment_shader) {
-    Point* points[] = {p1, p2, p3};
+void PrimitiveRenderer::RenderClippedTriangles(const std::vector<Point>& points,
+                                               const Texture& texture,
+                                               FragmentShader fragment_shader) {
+    for (int i = 1; i + 1 < points.size(); ++i) {
+        RenderTriangle(points[0], points[i], points[i + 1], texture, fragment_shader);
+    }
+}
+
+void PrimitiveRenderer::RenderTriangle(Point p1, Point p2, Point p3, const Texture& texture,
+                                       FragmentShader fragment_shader) {
+    Point* points[] = {&p1, &p2, &p3};
 
     TransformPoint(points[0]);
     TransformPoint(points[1]);
     TransformPoint(points[2]);
+
+    if (face_culling_enabled_) {
+        bool clockwise_winding_order =
+            glm::cross(glm::vec3(p2.pos - p1.pos), glm::vec3(p3.pos - p1.pos)).z > 0.0f;
+
+        if (clockwise_winding_order) {
+            return;
+        }
+    }
 
     std::sort(points, points + 3,
               [](const Point* a, const Point* b) { return a->pos.y < b->pos.y; });
@@ -117,12 +130,7 @@ void PrimitiveRenderer::RenderTriangle(Point* p1, Point* p2, Point* p3, const Te
     Point& mid_y_point = *points[1];
     Point& max_y_point = *points[2];
 
-    // std::cout << "Triangle" << std::endl;
-    // std::cout << p1->tex_coords << std::endl;
-    // std::cout << p2->tex_coords << std::endl;
-    // std::cout << p3->tex_coords << std::endl;
-
-    Gradients gradients(*p1, *p2, *p3);
+    Gradients gradients(p1, p2, p3);
 
     EdgeWalk long_edge(min_y_point, max_y_point, gradients);
     EdgeWalk short_top_edge(min_y_point, mid_y_point, gradients);
@@ -132,32 +140,20 @@ void PrimitiveRenderer::RenderTriangle(Point* p1, Point* p2, Point* p3, const Te
                                   glm::vec3(mid_y_point.pos - min_y_point.pos))
                            .z < 0.0f;
 
-
-    // TODO: Remove preprocessor
-#ifdef FACE_CULLING
-    bool clockwise_winding_order =
-        glm::cross(glm::vec3(p2->pos - p1->pos),
-                   glm::vec3(p3->pos - p1->pos))
-            .z > 0.0f;
-
-    if (clockwise_winding_order) {
-        return;
-    }
-#endif
     ScanBetweenEdges(&long_edge, &short_top_edge, righthanded, texture, fragment_shader);
     ScanBetweenEdges(&long_edge, &short_bottom_edge, righthanded, texture, fragment_shader);
 }
 
 void PrimitiveRenderer::TransformPoint(Point* p) {
-    float w = p->pos.w; // Save w for perspective texturing
+    float w = p->pos.w;  // Save w for perspective texturing
     p->pos = PerspectiveDivide(p->pos);
-    p->pos = ScreenSpaceTransformMatrix(screen_.GetWidth(), screen_.GetHeight()) * p->pos; 
-    // TODO: Don't reconstruct matrix every time
+    p->pos = ScreenSpaceTransformMatrix(screen_.GetWidth(), screen_.GetHeight()) * p->pos;
     p->pos.w = w;
 }
 
 void PrimitiveRenderer::ScanBetweenEdges(EdgeWalk* long_edge, EdgeWalk* short_edge,
-                                         bool righthanded, const Texture& texture, FragmentShader fragment_shader) {
+                                         bool righthanded, const Texture& texture,
+                                         FragmentShader fragment_shader) {
     int32_t start_y = std::max(0, short_edge->GetBeginY());
     int32_t end_y = std::min<int32_t>(short_edge->GetEndY(), screen_.GetHeight() - 1);
     EdgeWalk* left_edge = long_edge;
@@ -167,50 +163,36 @@ void PrimitiveRenderer::ScanBetweenEdges(EdgeWalk* long_edge, EdgeWalk* short_ed
         std::swap(left_edge, right_edge);
     }
 
-    for (int32_t y = start_y; y < end_y; ++y) {
+    for (int32_t y = start_y; y < end_y; ++y, left_edge->StepDown(), right_edge->StepDown()) {
         int start_x = left_edge->GetCurrentX();
-        int end_x = right_edge->GetCurrentX();
-
-        // assert(start_x <= end_x); TODO: investigate
-        // hack to ensure that thin triangles are drawn correctly, TODO: fix this
-        end_x = std::max(end_x, start_x + 1);  
-
+        int end_x = std::max(right_edge->GetCurrentX(), start_x + 1);
         float lerp_amount = 0.0f;
+        float lerp_step = 1.0f / (static_cast<float>(end_x) - static_cast<float>(start_x));
 
-        if (start_x != end_x) {
-            float lerp_step = 1.0f / (static_cast<float>(end_x) - static_cast<float>(start_x)); // sus
+        for (int32_t x = start_x; x < end_x; ++x, lerp_amount += lerp_step) {
+            float inv_w =
+                Lerp(left_edge->GetCurrentInvW(), right_edge->GetCurrentInvW(), lerp_amount);
+            float w = 1.0 / inv_w;
+            float z = Lerp(left_edge->GetCurrentZ(), right_edge->GetCurrentZ(), lerp_amount) * w;
 
-            // std::cerr << "Before line scan" << std::endl;
-            for (int32_t x = start_x; x < end_x; ++x, lerp_amount += lerp_step) {
-                float inv_w = Lerp(left_edge->GetCurrentInvW(), right_edge->GetCurrentInvW(), lerp_amount); 
-                float w = 1.0 / inv_w; 
-                float z = Lerp(left_edge->GetCurrentZ(), right_edge->GetCurrentZ(), lerp_amount) * w;
-                if(z < depth_buf_.Get(y, x)) {
-                    depth_buf_.Set(y, x, z);
-                    screen_.SetPixel(x, y, NormalizedColorToRGB(
-                            fragment_shader(
-                                texture, w, lerp_amount, 
-                                *left_edge, *right_edge, 
-                                view_pos_, point_lights_
-                            )
-                        )
-                    );
-                    // screen_.SetPixel(x, y, NormalizedColorToRGB(glm::vec4((left_edge->GetNormal() + 1.f) * 0.5f, 1.f)));
-                }
+            if (z > depth_buf_(y, x)) {
+                continue;
             }
+
+            depth_buf_(y, x) = z;
+            screen_.SetPixel(
+                x, y,
+                NormalizedColorToRGB(fragment_shader(texture, w, lerp_amount, *left_edge,
+                                                     *right_edge, view_pos_, point_lights_)));
         }
-
-
-        left_edge->StepDown();
-        right_edge->StepDown();
     }
 }
 
 std::vector<Point> PrimitiveRenderer::ClipTriangle(const Triangle& triangle) {
-    std::vector<Point> points = { triangle.GetPointA(), triangle.GetPointB(), triangle.GetPointC() };
+    std::vector<Point> points = {triangle.GetPointA(), triangle.GetPointB(), triangle.GetPointC()};
     std::vector<Point> buf;
     buf.reserve(6);
-    if(ClipAxis(&points, &buf, 0) && ClipAxis(&points, &buf, 1) && ClipAxis(&points, &buf, 2)) {
+    if (ClipAxis(&points, &buf, 0) && ClipAxis(&points, &buf, 1) && ClipAxis(&points, &buf, 2)) {
         return points;
     }
 
@@ -221,33 +203,34 @@ bool PrimitiveRenderer::ClipAxis(std::vector<Point>* in, std::vector<Point>* buf
     buf->clear();
     ClipBound(*in, buf, axis_idx, true);
 
-    if(buf->empty()) {
+    if (buf->empty()) {
         return false;
     }
 
     in->clear();
     ClipBound(*buf, in, axis_idx, false);
 
-    return !in->empty(); 
+    return !in->empty();
 }
 
-void PrimitiveRenderer::ClipBound(const std::vector<Point>& in, std::vector<Point>* out, int axis_idx, bool positive) {
+void PrimitiveRenderer::ClipBound(const std::vector<Point>& in, std::vector<Point>* out,
+                                  int axis_idx, bool positive) {
     float side = (positive ? 1 : -1);
     bool is_prev_inside = (side * in.back().pos[axis_idx] <= in.back().pos.w);
     const Point* prev_p = &in.back();
 
-    for(const Point& p : in) {
+    for (const Point& p : in) {
         bool is_inside = (side * p.pos[axis_idx] <= p.pos.w);
 
-        if(is_prev_inside ^ is_inside) {
-            float cur_p_diff = p.pos.w -  p.pos[axis_idx] * side;
+        if (is_prev_inside ^ is_inside) {
+            float cur_p_diff = p.pos.w - p.pos[axis_idx] * side;
             float prev_p_diff = prev_p->pos.w - prev_p->pos[axis_idx] * side;
-            float lerp_amount = cur_p_diff / (cur_p_diff - prev_p_diff); 
+            float lerp_amount = cur_p_diff / (cur_p_diff - prev_p_diff);
 
             out->push_back(p.Lerp(*prev_p, lerp_amount));
         }
 
-        if(is_inside) {
+        if (is_inside) {
             out->push_back(p);
         }
 

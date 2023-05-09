@@ -45,4 +45,4 @@ private:
     std::vector<std::pair<Lamp, glm::mat4>> lamps_;
 };
 
-}
+}  // namespace ani

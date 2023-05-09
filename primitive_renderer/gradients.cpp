@@ -15,7 +15,6 @@ Gradients::Gradients(const Point& a, const Point& b, const Point& c) {
     float partial_denominator_for_x_slope = x_dlt_bc * y_dlt_ac - x_dlt_ac * y_dlt_bc;
     float partial_denominator_for_y_slope = -partial_denominator_for_x_slope;
 
-    // TODO: Optimize number of divisions
     auto calc_x_slope = [&](auto val_a, auto val_b, auto val_c, bool perspective = true) {
         if(perspective) {
             val_a *= a_inv_w;

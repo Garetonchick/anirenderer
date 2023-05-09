@@ -7,6 +7,7 @@ namespace ani {
 class Texture {
 public:
     Texture() = default;
+    Texture(Image&& image);
     Texture(const std::string& path);
     Texture(const Image& image);
 
@@ -14,6 +15,8 @@ public:
     glm::vec4 Sample(float x, float y) const;
 
 private:
+    int ToPixelCoord(float x, int32_t bound) const;
+
     Image image_;
 };
-}
+}  // namespace ani

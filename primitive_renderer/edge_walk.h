@@ -22,7 +22,7 @@ public:
 
 private:
     void UpdateAfterStep();
-    
+
 private:
     const Gradients& gradients_;
     glm::vec3 normal_;
