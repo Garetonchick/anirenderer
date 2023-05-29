@@ -50,24 +50,6 @@ void Application::AddObjects() {
         glm::mat4(1.f)        
     );
 
-    // models_.emplace_back(
-    //     Model(
-    //         FullPath("assets/teapot/teapot.obj"), 
-    //         Texture(FullPath("assets/teapot/sand.jpeg"))
-    //     ), 
-    //     glm::translate(glm::mat4(1.f), {0.f, -1.6f, -6.2f}) //*
-    //     // glm::rotate(glm::mat4(1.f), glm::radians(180.f), glm::vec3(1.f, 0.f, 0.f))
-    // );
-
-    // models_.emplace_back(
-    //     Model(
-    //         FullPath("assets/cube/cube.obj"), 
-    //         Texture(FullPath("assets/textures/dirt.jpg"))
-    //     ), 
-    //     glm::translate(glm::mat4(1.f), {0.f, -1.6f, -6.2f}) //*
-    //     // glm::rotate(glm::mat4(1.f), glm::radians(180.f), glm::vec3(1.f, 0.f, 0.f))
-    // );
-
     models_.emplace_back(
         Model(
             FullPath("assets/backpack/backpack.obj"), 
@@ -75,19 +57,6 @@ void Application::AddObjects() {
         ), 
         glm::translate(glm::mat4(1.f), {0.f, -1.6f, -6.2f})
     );
-
-
-    // models_.emplace_back(
-    //     Model(
-    //         FullPath("assets/iron-man/IronMan.obj"), 
-    //         Texture(FullPath("assets/teapot/dirt.jpg"))
-    //     ), 
-    //     glm::scale(glm::translate(glm::mat4(1.f), {-8.f, -1.6f, -6.2f}), glm::vec3{0.1f})
-    // );
-
-    // models_.emplace_back(Model(FullPath("assets/teapot/teapot.obj")), glm::translate(glm::mat4(1.f), {8.f, -1.6f, -6.2f}));
-    // models_.emplace_back(Model(FullPath("assets/teapot/teapot.obj")), glm::translate(glm::mat4(1.f), {16.f, -1.6f, -6.2f}));
-
 }
 
 void Application::AddLights() {
