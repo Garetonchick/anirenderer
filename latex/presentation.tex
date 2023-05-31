@@ -86,25 +86,34 @@
 \begin{frame}{Треугольники}
 Любой 3d-объект будем аппроксимировать треугольниками.
 
+\begin{center}
+\includegraphics[width=0.6 \linewidth]{triangles.png}
+\end{center}
+
 Значит теперь мы хотим научиться рендерить 1 треугольник.
-% TODO: картинка: triangles -> model
 
 \end{frame}
 
 \begin{frame}{Пайплайн}
-% TODO: Общая картинка по которой поясняется что мы 
-% из local space хотим попасть в screen space
-
+\begin{center}
+\includegraphics[width=0.86 \linewidth]{coord_systems.png}
+\end{center}
 \end{frame}
 
 \begin{frame}{Local space}
     Local space -- персональное для каждого объекта пространство в котором нам изначально приходят 
     координаты объекта(например из .obj файла). 
+\begin{center}
+\includegraphics[width=0.86 \linewidth]{local.png}
+\end{center}
 \end{frame}
 \begin{frame}{World space}
     В реальности у нас как правило несколько объектов входящих в 
     сцену. Их расположение относительно друг друга задается в world space 
     системе координат.
+\begin{center}
+\includegraphics[width=0.5 \linewidth]{world.png}
+\end{center}
 \end{frame}
 
 \begin{frame}{Преобразования координат}
@@ -160,10 +169,18 @@
 
 \end{frame}
 
+\begin{frame}{View space}
+\begin{center}
+\includegraphics[width=0.7 \linewidth]{view.png}
+\end{center}
+\end{frame}
+
 \begin{frame}{Clip space}
 
 Перспективная проекция + обрезка(clipping)
-% TODO: картинка с проекцией
+\begin{center}
+\includegraphics[width=0.8 \linewidth]{my_frustum.png}
+\end{center}
 
 \end{frame}
 
@@ -183,24 +200,34 @@
 
     $w'$, $h'$ -- половинки ширины и высоты окна.
 
+\begin{center}
+\includegraphics[width=0.6 \linewidth]{screen.png}
+\end{center}
 \end{frame}
 
 \begin{frame}{Растеризация}
     Хотим понять какие пиксели лежат внутри треугольника и их нужно 
     закрасить, а какие нет.
-% Что-то вроде 
-% https://www.scratchapixel.com/images/rasterization/rasterization-triangle1.png?
+\begin{center}
+\includegraphics[width=0.8 \linewidth]{rasterization.png}
+\end{center}
 \end{frame}
 
 
 \begin{frame}{Растеризация}
 %Картинка на которой помечено стрелочками как мы идем
 %по long edge, и top edge
+\begin{center}
+\includegraphics[width=0.8 \linewidth]{algo-1.png}
+\end{center}
 \end{frame}
 
 \begin{frame}{Растеризация}
 %Картинка на которой помечено стрелочками как мы продолжаем
 %идти по long edge и идем по bottom edge
+\begin{center}
+\includegraphics[width=0.8 \linewidth]{algo-2.png}
+\end{center}
 \end{frame}
 
 \begin{frame}{Буфер глубины}
@@ -212,7 +239,9 @@
 \begin{frame}{Линейная интерполяция}
     Достаточно посчитать градиент линейной функции от координат 
     $x$ и $y$.
-% TODO: Картинка с градиентом
+\begin{center}
+\includegraphics[width=0.8 \linewidth]{gradient.png}
+\end{center}
 \end{frame}
 \begin{frame}{Линейная интерполяция}
     Проблема: зависимость интерполянта от screen space координат 
@@ -226,11 +255,16 @@
 \begin{frame}{Точечный свет}
 В качестве источника света используется точечный свет.
 % TODO: Картинка с точечным цветом
+\begin{center}
+\includegraphics[width=0.8 \linewidth]{lamp.png}
+\end{center}
 \end{frame}
 
 \begin{frame}{Phong Shading Model}
     Ambient + diffuse + specular
-    % TODO: Картиночка
+\begin{center}
+\includegraphics[width=1 \linewidth]{phong.png}
+\end{center}
 \end{frame}
 
 \begin{frame}{Результаты}
