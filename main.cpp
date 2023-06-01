@@ -15,4 +15,6 @@ int main() {
         std::cerr << "Unexpected exception was thrown" << std::endl;
         return 2;
     }
+
+    return 0;
 }

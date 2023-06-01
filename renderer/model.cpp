@@ -5,27 +5,7 @@
 #include "glm/geometric.hpp"
 #include "utility/image.h"
 
-namespace ani {
-
-Model::Model(const std::string& path, const Texture& texture, const glm::mat4& scale_trans) : texture_(texture), scale_trans_(scale_trans) {
-    LoadModel(path, scale_trans);
-}
-
-Model::Model(const std::string& path, const glm::vec4& color, const glm::mat4& scale_trans) : scale_trans_(scale_trans) {
-    LoadModel(path, scale_trans);
-
-    for(auto& triangle : triangles_) {
-        triangle.GetPointA().color = triangle.GetPointB().color = triangle.GetPointC().color = color;
-    }
-}
-
-const std::vector<Triangle>& Model::GetTriangles() const {
-    return triangles_;
-}
-
-const Texture& Model::GetTexture() const {
-    return texture_;
-}
+namespace {
 
 char* SkipSpaces(char* s) {
     while(*s && *s == ' ') {
@@ -35,13 +15,58 @@ char* SkipSpaces(char* s) {
     return s;
 }
 
-void Model::LoadModel(const std::string& path, const glm::mat4& scale_trans) {
-    std::ifstream in(path);
+const char* GetNextVertexIndicies(const char* s, int32_t* vertex_idx, int32_t* tex_coord_idx, int32_t* normal_idx) {
+    *vertex_idx = *tex_coord_idx = *normal_idx = -1;
+    char* nxt = nullptr;
+    *vertex_idx = strtol(s, &nxt, 10) - 1;
 
-    if(!in) {
-        throw std::runtime_error(std::string("Couldn't open file: ") + path);
+    if(*nxt != '/') {
+        return SkipSpaces(nxt);
     }
 
+    ++nxt;
+    char* cur = nxt;
+    *tex_coord_idx = strtol(cur, &nxt, 10) - 1;
+    
+    if(*nxt != '/') {
+        return SkipSpaces(nxt);
+    }
+
+    ++nxt;
+    cur = nxt;
+    *normal_idx = strtol(cur, &nxt, 10) - 1;
+
+    return SkipSpaces(nxt);
+}
+
+}
+
+namespace ani {
+
+const std::vector<Triangle>& Model::GetTriangles() const {
+    return triangles_;
+}
+
+const Texture& Model::GetTexture() const {
+    return texture_;
+}
+
+void Model::SetTexture(Texture texture) {
+    texture_ = std::move(texture);
+}
+
+void Model::SetColor(const glm::vec4& color) {
+    texture_ = Texture();
+    for(auto& triangle : triangles_) {
+        triangle.GetPointA().color = triangle.GetPointB().color = triangle.GetPointC().color = color;
+    }
+}
+
+void Model::SetScale(const glm::mat4& scale) {
+    scale_trans_ = scale;
+}
+
+std::istream& operator>>(std::istream& in, Model& model) {
     std::string s;
     std::vector<glm::vec4> verticies;
     std::vector<glm::vec2> tex_coords;
@@ -100,10 +125,10 @@ void Model::LoadModel(const std::string& path, const glm::mat4& scale_trans) {
                         = glm::normalize(-glm::cross(glm::vec3(p2.pos - p1.pos), glm::vec3(p2.pos - p3.pos)));
                 }
 
-                p1.pos = scale_trans_ * p1.pos;
-                p2.pos = scale_trans_ * p2.pos;
-                p3.pos = scale_trans_ * p3.pos;
-                triangles_.emplace_back(p1, p2, p3);
+                p1.pos = p1.pos;
+                p2.pos = p2.pos;
+                p3.pos = p3.pos;
+                model.triangles_.emplace_back(p1, p2, p3);
                 last_ver_idx = ver_idx;
                 last_tex_idx = tex_idx;
                 last_norm_idx = norm_idx;
@@ -119,30 +144,35 @@ void Model::LoadModel(const std::string& path, const glm::mat4& scale_trans) {
             normal = glm::normalize(normal);
         }
     }
+    return in;
 }
 
-const char* Model::GetNextVertexIndicies(const char* s, int32_t* vertex_idx, int32_t* tex_coord_idx, int32_t* normal_idx) {
-    *vertex_idx = *tex_coord_idx = *normal_idx = -1;
-    char* nxt = nullptr;
-    *vertex_idx = strtol(s, &nxt, 10) - 1;
+Model LoadModel(const std::string& path, const Texture& texture, const glm::mat4& scale_trans) {
+    Model m;
+    std::ifstream in(path);
 
-    if(*nxt != '/') {
-        return SkipSpaces(nxt);
+    if(!in) {
+        throw std::runtime_error(std::string("Couldn't open file: ") + path);
     }
 
-    ++nxt;
-    char* cur = nxt;
-    *tex_coord_idx = strtol(cur, &nxt, 10) - 1;
-    
-    if(*nxt != '/') {
-        return SkipSpaces(nxt);
+    in >> m;
+    m.SetTexture(texture);
+    m.SetScale(scale_trans);
+    return m;
+}
+
+Model LoadModel(const std::string& path, const glm::vec4& color, const glm::mat4& scale_trans) {
+    Model m;
+    std::ifstream in(path);
+
+    if(!in) {
+        throw std::runtime_error(std::string("Couldn't open file: ") + path);
     }
 
-    ++nxt;
-    cur = nxt;
-    *normal_idx = strtol(cur, &nxt, 10) - 1;
-
-    return SkipSpaces(nxt);
+    in >> m;
+    m.SetColor(color);
+    m.SetScale(scale_trans);
+    return m;
 }
     
 }

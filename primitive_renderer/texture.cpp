@@ -10,7 +10,7 @@ Texture::Texture(Image&& image) : image_(std::move(image)) {
 Texture::Texture(const Image& image) : image_(image) {
 }
 
-Texture::Texture(const std::string& path) : image_(path) {
+Texture::Texture(const std::string& path) : image_(LoadImage(path)) {
 }
 
 glm::vec4 Texture::Sample(glm::vec2 tex_coords) const {

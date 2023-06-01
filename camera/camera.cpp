@@ -11,8 +11,7 @@ namespace ani {
 
 Camera::Camera(const glm::vec3& pos, float pitch, float yaw, float min_pitch, float max_pitch)
     : pos_(pos), pitch_(pitch), yaw_(yaw), min_pitch_(min_pitch), max_pitch_(max_pitch) {
-    UpdateAngles();
-    SetViewFrustrum(60.f, 1.f, 0.1f, 100.f);
+    NormalizeAngles();
 }
 
 const glm::vec3& Camera::GetPos() const {
@@ -27,16 +26,16 @@ float Camera::GetYaw() const {
     return yaw_;
 }
 
-glm::mat4 Camera::GetViewMatrix() const {
-    return glm::lookAt(pos_, pos_ + GetDirectionVec(), GetUpVec());
+const glm::mat4& Camera::GetViewMatrix() const {
+    return view_;
 }
 
-glm::mat4 Camera::GetProjMatrix() const {
+const glm::mat4& Camera::GetProjMatrix() const {
     return proj_;
 }
 
-glm::mat4 Camera::GetViewProjMatrix() const {
-    return GetProjMatrix() * GetViewMatrix();
+const glm::mat4& Camera::GetViewProjMatrix() const {
+    return view_proj_;
 }
 
 glm::vec3 Camera::GetDirectionVec() const {
@@ -57,6 +56,7 @@ glm::vec3 Camera::GetUpVec() const {
 
 void Camera::SetViewFrustrum(float yfov, float width_to_height_ratio, float near, float far) {
     proj_ = glm::perspective(glm::radians(yfov), width_to_height_ratio, near, far);
+    RecalcMatricies();
 }
 
 void Camera::Move(const glm::vec3& pos_dlt) {
@@ -66,10 +66,11 @@ void Camera::Move(const glm::vec3& pos_dlt) {
 void Camera::Rotate(float pitch_dlt, float yaw_dlt) {
     pitch_ += pitch_dlt;
     yaw_ += yaw_dlt;
-    UpdateAngles();
+    NormalizeAngles();
+    RecalcMatricies();
 }
 
-void Camera::UpdateAngles() {
+void Camera::NormalizeAngles() {
     pitch_ = std::clamp(pitch_, min_pitch_, max_pitch_);
 
     if (yaw_ <= 0.f) {
@@ -77,6 +78,15 @@ void Camera::UpdateAngles() {
     } else if (yaw_ >= 360.f) {
         yaw_ -= 360.f;
     }
+}
+
+void Camera::RecalcMatricies() {
+    view_ = CalcViewMatrix();
+    view_proj_ = proj_ * view_;
+}
+
+glm::mat4 Camera::CalcViewMatrix() {
+    return glm::lookAt(pos_, pos_ + GetDirectionVec(), GetUpVec());
 }
 
 }  // namespace ani

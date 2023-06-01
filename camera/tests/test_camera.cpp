@@ -71,10 +71,10 @@ void Update(ani::Window* window, float dt) {
         if(released_c) {
             is_mouse_locked = !is_mouse_locked;
             
-            if(window->GetCursorState() == ani::CursorState::LOCKED_INSIDE) {
-                window->SetCursorState(ani::CursorState::NORMAL);
+            if(window->GetCursorState() == ani::CursorState::LockedInside) {
+                window->SetCursorState(ani::CursorState::Normal);
             } else {
-                window->SetCursorState(ani::CursorState::LOCKED_INSIDE);
+                window->SetCursorState(ani::CursorState::LockedInside);
             }
         }
 
@@ -92,7 +92,7 @@ int main() {
     ani::Window window(600, 600);
 
     is_mouse_locked = true;
-    window.SetCursorState(ani::CursorState::LOCKED_INSIDE);
+    window.SetCursorState(ani::CursorState::LockedInside);
     window.SetCursorMovedCallback(MoveMouseCallback);
 
     ani::Renderer renderer(window.GetWidth(), window.GetHeight());

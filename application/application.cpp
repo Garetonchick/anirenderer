@@ -7,10 +7,9 @@
 
 namespace ani {
 
-const std::string Application::kAppPath = ANIRENDERER_PATH; 
-
-Application::Application() : window_(800, 600), renderer_(800, 600) {
-    window_.SetCursorState(ani::CursorState::LOCKED_INSIDE);
+Application::Application() 
+    : window_(kInitialWindowWidth, kInitialWindowHeight, "aniwindow", CursorState::LockedInside)
+    , renderer_(kInitialHorizontalResolution, kInitialVerticalResolution) {
     window_.SetCursorMovedCallback([this](int dx, int dy){
         this->CursorMovedCallback(dx, dy);
     });
@@ -42,7 +41,7 @@ void Application::SetupScene() {
 
 void Application::AddObjects() {
     lamps_.emplace_back(
-        Lamp{.model = Model(
+        Lamp{.model = LoadModel(
             FullPath("assets/cube/cube.obj"), 
             {1.f, 1.f, 1.f, 1.f}, 
             glm::scale(glm::mat4(1.f), glm::vec3(0.4f)))
@@ -51,7 +50,7 @@ void Application::AddObjects() {
     );
 
     models_.emplace_back(
-        Model(
+        LoadModel(
             FullPath("assets/backpack/backpack.obj"), 
             Texture(FullPath("assets/textures/backpack.jpg"))
         ), 
@@ -66,7 +65,7 @@ void Application::AddLights() {
 }
 
 void Application::UpdateScene(float dt) {
-    if(window_.GetCursorState() == CursorState::LOCKED_INSIDE) {
+    if(window_.GetCursorState() == CursorState::LockedInside) {
         if(window_.IsKeyPressed(sf::Keyboard::W)) {
             camera_.Move(kMovementSpeed * dt * camera_.GetDirectionVec());
         } 
@@ -91,10 +90,10 @@ void Application::UpdateScene(float dt) {
 
     if(window_.IsKeyPressed(sf::Keyboard::C)) {
         if(released_c) {
-            if(window_.GetCursorState() == CursorState::LOCKED_INSIDE) {
-                window_.SetCursorState(CursorState::NORMAL);
+            if(window_.GetCursorState() == CursorState::LockedInside) {
+                window_.SetCursorState(CursorState::Normal);
             } else {
-                window_.SetCursorState(CursorState::LOCKED_INSIDE);
+                window_.SetCursorState(CursorState::LockedInside);
             }
         }
 
@@ -109,7 +108,7 @@ void Application::UpdateScene(float dt) {
 }
 
 void Application::DrawScene() {
-    renderer_.Clear({50, 50, 50});
+    renderer_.Clear();
 
     for(auto& [model, trans] : models_) {
         renderer_.Render(model, StandartShader, camera_.GetPos(), camera_.GetViewMatrix(), camera_.GetProjMatrix(), trans);
@@ -123,7 +122,7 @@ void Application::DrawScene() {
 }
 
 void Application::CursorMovedCallback(int dx, int dy) {
-    if(window_.GetCursorState() != CursorState::LOCKED_INSIDE) {
+    if(window_.GetCursorState() != CursorState::LockedInside) {
         return;
     }
 

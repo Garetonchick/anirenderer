@@ -25,7 +25,7 @@ struct Segment {
     Point b;
 };
 
-struct Triangle {
+class Triangle {
 public:
     Triangle(const Point& a, const Point& b, const Point& c);
 

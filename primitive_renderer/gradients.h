@@ -6,10 +6,12 @@ namespace ani {
 class Gradients {
 public:
     Gradients(const Point& a, const Point& b, const Point& c);
-    Gradients(const Gradients& o) = default;
-    Gradients& operator=(const Gradients& o) = default;
+
+    Gradients(const Gradients& o) = delete;
+    Gradients& operator=(const Gradients& o) = delete;
     Gradients(Gradients&& o) = delete;
     Gradients& operator=(Gradients&& o) = delete;
+    ~Gradients() = default;
 
     const glm::vec4& GetXColorSlope() const;
     const glm::vec4& GetYColorSlope() const;

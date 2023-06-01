@@ -2,7 +2,10 @@
 
 namespace ani {
 
-std::mt19937 rnd;
+std::mt19937& GetRandGen() {
+    static std::mt19937 gen;
+    return gen;
+}
 
 glm::vec4 RandomVec4(float l, float r) {
     return glm::vec4{ RandomReal(l, r), 

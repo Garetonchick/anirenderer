@@ -64,10 +64,10 @@ PrimitiveRenderer::PrimitiveRenderer(uint32_t screen_width, uint32_t screen_heig
     : screen_(screen_width, screen_height),
       depth_buf_(screen_width, screen_height, 1.f),
       view_pos_(0.f) {
-    Clear({0, 255, 0});
+    Clear();
 }
 
-void PrimitiveRenderer::Clear(const RGB& color) {
+void PrimitiveRenderer::Clear(RGB color) {
     screen_.Fill(color);
     depth_buf_.Fill(1.f);
 }
@@ -110,9 +110,9 @@ void PrimitiveRenderer::RenderTriangle(Point p1, Point p2, Point p3, const Textu
                                        FragmentShader fragment_shader) {
     Point* points[] = {&p1, &p2, &p3};
 
-    TransformPoint(points[0]);
-    TransformPoint(points[1]);
-    TransformPoint(points[2]);
+    TransformClippedToScreen(points[0]);
+    TransformClippedToScreen(points[1]);
+    TransformClippedToScreen(points[2]);
 
     if (face_culling_enabled_) {
         bool clockwise_winding_order =
@@ -144,10 +144,10 @@ void PrimitiveRenderer::RenderTriangle(Point p1, Point p2, Point p3, const Textu
     ScanBetweenEdges(&long_edge, &short_bottom_edge, righthanded, texture, fragment_shader);
 }
 
-void PrimitiveRenderer::TransformPoint(Point* p) {
+void PrimitiveRenderer::TransformClippedToScreen(Point* p) {
     float w = p->pos.w;  // Save w for perspective texturing
     p->pos = PerspectiveDivide(p->pos);
-    p->pos = ScreenSpaceTransformMatrix(screen_.GetWidth(), screen_.GetHeight()) * p->pos;
+    p->pos = CalcScreenSpaceTransformMatrix(screen_.GetWidth(), screen_.GetHeight()) * p->pos;
     p->pos.w = w;
 }
 
@@ -167,7 +167,7 @@ void PrimitiveRenderer::ScanBetweenEdges(EdgeWalk* long_edge, EdgeWalk* short_ed
         int start_x = left_edge->GetCurrentX();
         int end_x = std::max(right_edge->GetCurrentX(), start_x + 1);
         float lerp_amount = 0.0f;
-        float lerp_step = 1.0f / (static_cast<float>(end_x) - static_cast<float>(start_x));
+        float lerp_step = 1.0f / (end_x - start_x);
 
         for (int32_t x = start_x; x < end_x; ++x, lerp_amount += lerp_step) {
             float inv_w =
@@ -237,6 +237,16 @@ void PrimitiveRenderer::ClipBound(const std::vector<Point>& in, std::vector<Poin
         prev_p = &p;
         is_prev_inside = is_inside;
     }
+}
+
+glm::mat4 PrimitiveRenderer::CalcScreenSpaceTransformMatrix(int32_t width, int32_t height) {
+    float half_w = static_cast<float>(width - 1) * 0.5f;
+    float half_h = static_cast<float>(height - 1) * 0.5f;
+
+    return glm::mat4x4{{half_w, 0.f, 0.f, 0.f},
+                       {0.f, -half_h, 0.f, 0.f},
+                       {0.f, 0.f, 1.f, 0.f},
+                       {half_w, half_h, 0.f, 1.f}};
 }
 
 }  // namespace ani

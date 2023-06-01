@@ -13,11 +13,16 @@
 
 namespace ani {
 
-enum class CursorState { NORMAL, LOCKED_INSIDE };
+enum class CursorState { Normal, LockedInside };
 
 class Window : private sf::RenderWindow {
 public:
-    Window(uint32_t width = 800, uint32_t height = 600, const std::string& title = "aniwindow");
+    Window(
+        uint32_t width = 800, 
+        uint32_t height = 600, 
+        const std::string& title = "aniwindow", 
+        CursorState cursor_state = CursorState::Normal
+    );
 
     bool IsOpen() const;
     bool IsKeyPressed(sf::Keyboard::Key key) const;
@@ -27,7 +32,7 @@ public:
     CursorState GetCursorState() const;
 
     void Display(const Image& image);
-    void Clear(const RGB& color = {0, 255, 0});
+    void Clear(RGB color = {0, 255, 0});
     void Close();
     void PollEvents();
     void SetSize(uint32_t width, uint32_t height);
@@ -43,12 +48,10 @@ private:
     void onResize() override;  // NOLINT
 
 private:
-    static const uint32_t kColorChannelsNum = 4;
-
     sf::Texture texture_;
     sf::Sprite sprite_;
 
-    CursorState cursor_state_ = CursorState::NORMAL;
+    CursorState cursor_state_;
     bool first_cursor_move_ = true;
 
     std::function<void(int, int)> cursor_moved_callback_ = [](int, int) {};

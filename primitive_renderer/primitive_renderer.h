@@ -31,7 +31,7 @@ class PrimitiveRenderer {
 public:
     explicit PrimitiveRenderer(uint32_t screen_width = 800, uint32_t screen_height = 600);
 
-    void Clear(const RGB& color);
+    void Clear(RGB color = kDefaultColor);
     void SetScreenSize(uint32_t screen_width, uint32_t screen_height);
     void SetViewPos(const glm::vec3& view_pos);
     void SetFaceCulling(bool enable);
@@ -45,15 +45,18 @@ private:
                                 FragmentShader fragment_shader);
     void RenderTriangle(Point p1, Point p2, Point p3, const Texture& texture,
                         FragmentShader fragment_shader);
-    void TransformPoint(Point* p);
+    void TransformClippedToScreen(Point* p);
     void ScanBetweenEdges(EdgeWalk* long_edge, EdgeWalk* short_edge, bool righthanded,
                           const Texture& texture, FragmentShader fragment_shader);
     std::vector<Point> ClipTriangle(const Triangle& triangle);
     bool ClipAxis(std::vector<Point>* in, std::vector<Point>* buf, int axis_idx);
     void ClipBound(const std::vector<Point>& in, std::vector<Point>* out, int axis_idx,
                    bool positive);
+    glm::mat4 CalcScreenSpaceTransformMatrix(int32_t width, int32_t height);
 
 private:
+    static constexpr const RGB kDefaultColor = {50, 50, 50};
+
     Image screen_;
     Array2D<float> depth_buf_;
     std::vector<PointLight> point_lights_;

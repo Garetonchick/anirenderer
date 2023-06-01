@@ -32,9 +32,13 @@ private:
     float GetFrameTime(sf::Time frame_start_time) const;
 
 private:
-    static const std::string kAppPath;
+    static constexpr const char* kAppPath = ANIRENDERER_PATH;
     static constexpr float kMovementSpeed = 0.01f;
     static constexpr float kMouseSensitivity = 0.1f;
+    static constexpr uint32_t kInitialWindowWidth = 800;
+    static constexpr uint32_t kInitialWindowHeight = 600;
+    static constexpr uint32_t kInitialHorizontalResolution = 800;
+    static constexpr uint32_t kInitialVerticalResolution = 600;
 
     ani::Window window_;
     ani::Renderer renderer_;

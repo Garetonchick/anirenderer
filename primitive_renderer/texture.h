@@ -8,8 +8,8 @@ class Texture {
 public:
     Texture() = default;
     Texture(Image&& image);
-    Texture(const std::string& path);
     Texture(const Image& image);
+    Texture(const std::string& path);
 
     glm::vec4 Sample(glm::vec2 tex_coords) const;
     glm::vec4 Sample(float x, float y) const;

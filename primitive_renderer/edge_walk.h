@@ -6,7 +6,7 @@ namespace ani {
 
 class EdgeWalk {
 public:
-    EdgeWalk(Point top, Point bottom, const Gradients& gradients);
+    EdgeWalk(const Point& top, const Point& bottom, const Gradients& gradients);
 
     int32_t GetBeginY() const;
     int32_t GetEndY() const;

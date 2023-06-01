@@ -4,7 +4,7 @@
 
 namespace ani {
 
-EdgeWalk::EdgeWalk(Point top, Point bottom, const Gradients& gradients)
+EdgeWalk::EdgeWalk(const Point& top, const Point& bottom, const Gradients& gradients)
     : gradients_(gradients), normal_(top.normal) {
     begin_int_y_ = std::ceil(top.pos.y);
     end_int_y_ = std::ceil(bottom.pos.y);
