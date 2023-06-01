@@ -19,10 +19,6 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     )
 endif()
 
-# Add roots of includes
-include_directories(${CMAKE_CURRENT_LIST_DIR})
-include_directories(${CMAKE_CURRENT_LIST_DIR}/dependencies)
-
 # Load SFML targets
 include(FetchContent)
 FetchContent_Declare(
@@ -46,7 +42,12 @@ message(STATUS "Anirenderer flags are: ${ANIRENDERER_FLAGS}")
 # Link external dependencies to executable
 target_link_libraries(anirenderer PRIVATE application sfml-includes)
 
-# Setup clang-tidy 
+# Add roots of includes
+include_directories(${CMAKE_CURRENT_LIST_DIR})
+include_directories(${CMAKE_CURRENT_LIST_DIR}/dependencies)
+include_directories(${CMAKE_CURRENT_LIST_DIR}/glm)
+
+#Setup clang-tidy 
 set_target_properties(
     anirenderer
     PROPERTIES
