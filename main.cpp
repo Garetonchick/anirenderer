@@ -1,25 +1,20 @@
-#include <SFML/Graphics.hpp>
+#include <application/application.h>
 
-int main()
-{
-    sf::RenderWindow window(
-        sf::VideoMode(640, 480),
-        "Hello World");
-    sf::CircleShape shape(200);
- 
-    while (window.isOpen())
-    {
-        sf::Event event;
-        while (
-            window.pollEvent(event))
-            if (event.type ==
-            sf::Event::Closed)
-                window.close();
- 
-        window.clear();
-        window.draw(shape);
-        window.display();
+#include <iostream>
+#include <exception>
+
+int main() {
+    ani::Application app;
+
+    try {
+        app.Run();
+    } catch(std::exception& e) {
+        std::cerr << e.what() << std::endl;
+        return 1;
+    } catch(...) {
+        std::cerr << "Unexpected exception was thrown" << std::endl;
+        return 2;
     }
+
     return 0;
 }
-
