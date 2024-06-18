@@ -1,31 +1,22 @@
 # Anirenderer
-Это 3D software renderer — программа способная отображать 3-ех мерные объекты на плоском экране и при 
-этом использующая для вычислений только cpu. 
+Anirenderer is a 3D software renderer that uses the CPU for all calculations to render 3D objects. The main advantage over classic GPU rendering is that the rendering results are reproducible across different hardware.
 
-Основное преимущество в сравнении с классическим 
-рендерингом на gpu, это воспроизводимость одинаковых
-результатов на разных платформах(некоторые алгоритмы зашиты прямо в gpu и могут отличаться 
-на разном оборудовании).
-
-# Скриншоты
+# Screenshots
 ![](/latex/backpack_far.png?raw=true "Backpack from afar")
 
 ![](/latex/backpack_light.png?raw=true "Backpack light side")
 
 ![](/latex/backpack_dark.png?raw=true "Backpack dark side")
 
-На скриншотах можно видеть рюкзак освещенный с одной стороны точечным источником света изображенным в виде белого куба.
+The screenshots above show a render of a backpack illuminated from one side by a point light originating from a white cube.
 
-# Тестовая программа
-Бинарник полученный после сборки запустит тестовую 
-программу в которой можно передвигаться в пространстве на WASD, а также осматриваться мышкой.
-На клавишу C осуществляется переключение между режимом исследования сцены и управления мышью.
-
-# Сборка и запуск
+# Build and run 
 ## Linux
-Для сборки понадобится CMake.
-
     mkdir build
     cmake -DCMAKE_BUILD_TYPE=Release -S . -B build 
     cd build && make anirenderer 
     ./anirenderer
+
+# Test program
+
+The compiled binary includes a test program that allows you to explore a 3D scene. You can move using the WASD keys and look around using your mouse. Press the "C" key to switch between scene exploration mode and mouse usage mode.
